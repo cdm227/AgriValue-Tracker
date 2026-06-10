@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriValue AI - Sicilian Advisor Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .laser-line {
+            background: linear-gradient(180deg, rgba(16,185,129,0) 0%, rgba(16,185,129,1) 50%, rgba(16,185,129,0) 100%);
+            animation: scan 2s infinite ease-in-out;
+        }
+        @keyframes scan {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans overflow-hidden antialiased">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md px-6 py-4 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-emerald-600 text-slate-950 p-2.5 rounded-xl font-bold flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <i data-lucide="cpu" class="w-6 h-6 animate-pulse"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                    AgriValue <span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold">SICILIAN AGENT PIPELINE v2.0</span>
+                </h1>
+                <p class="text-xs text-slate-400">Institutional Agricultural Value-Chain Optimization System</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
+            <span class="text-xs font-semibold text-emerald-400 tracking-wider uppercase font-mono">Agent Connected</span>
+        </div>
+    </header>
+
+    <!-- Grid -->
+    <main class="flex-1 flex overflow-hidden p-6 gap-6">
+        
+        <!-- Left: Inputs & Visual Scanner -->
+        <section class="w-1/3 flex flex-col gap-6 overflow-hidden shrink-0">
+            <!-- Inputs -->
+            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-md flex flex-col">
+                <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="sliders" class="text-emerald-400"></i> Parameters
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 uppercase tracking-wider font-bold mb-1.5">Asset Class</label>
+                        <select id="crop" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all cursor-pointer">
+                            <option value="Olive Oil">Olive Oil 🌿 (Olio DOP)</option>
+                            <option value="Grapes">Grapes 🍇 (Vino DOC)</option>
+                            <option value="Wheat">Wheat 🌾 (Grano duro)</option>
+                            <option value="Coffee">Coffee ☕</option>
+                            <option value="Milk">Milk 🥛</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 uppercase tracking-wider font-bold mb-1.5">Quantity (MT)</label>
+                        <input type="number" id="qty" value="10" min="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all">
+                    </div>
+
+                    <label class="flex items-center gap-3 mt-4 cursor-pointer group bg-slate-950/50 p-3 rounded-xl border border-slate-800/40 hover:border-emerald-500/30 transition-colors">
+                        <input type="checkbox" id="organic" class="rounded border-slate-800 bg-slate-950 text-emerald-500 focus:ring-emerald-500 w-5 h-5 cursor-pointer">
+                        <div class="text-left">
+                            <span class="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">DOP / DOC Quality Certified</span>
+                            <p class="text-[10px] text-slate-500">Unlocks Live Foundry Agent Verified Bonus</p>
+                        </div>
+                    </label>
+
+                    <button class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black py-4 rounded-xl transition-all shadow-lg shadow-emerald-600/10 hover:shadow-emerald-600/20 active:scale-[0.98] uppercase tracking-wider text-sm mt-2" onclick="optimizeChain()">
+                        Query Foundry Agent
+                    </button>
+                </div>
+            </div>
+
+            <!-- Visual Quality Scanner -->
+            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-md flex-1 flex flex-col justify-between overflow-hidden">
+                <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                    <span class="flex items-center gap-2"><i data-lucide="camera" class="text-indigo-400"></i> Visual Quality Scan</span>
+                    <span class="text-[9px] bg-slate-800 px-2 py-0.5 rounded text-indigo-300 font-mono">VISION PORT</span>
+                </h3>
+                
+                <div class="flex-1 my-4 bg-slate-950 rounded-xl border border-slate-800 relative flex items-center justify-center overflow-hidden h-40">
+                    <div id="scanner-laser" class="absolute w-full h-1.5 laser-line z-10" style="display:none;"></div>
+                    <div id="scan-preview" class="text-slate-500 text-xs text-center px-4 space-y-2">
+                        <i data-lucide="image" class="w-10 h-10 mx-auto text-slate-700"></i>
+                        <p>Upload a photo of your olives or grapes to run a cognitive neural analysis.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <input type="file" id="file-uploader" accept="image/*" class="hidden" onchange="runImageScan(event)">
+                    <button onclick="document.getElementById('file-uploader').click()" class="w-full bg-slate-850 hover:bg-slate-800 text-indigo-400 font-bold py-2.5 rounded-xl border border-indigo-500/20 text-xs uppercase flex items-center justify-center gap-2 transition-colors">
+                        <i data-lucide="upload" class="w-4 h-4"></i> Upload Crop Photo
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right: Visualizer & Live Agent Console -->
+        <section class="flex-1 flex flex-col gap-6 overflow-hidden">
+            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-md flex-1 flex flex-col overflow-y-auto">
+                <div id="welcome-pane" class="flex-1 flex flex-col items-center justify-center text-center p-8">
+                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-full mb-4">
+                        <i data-lucide="sprout" class="w-12 h-12 text-emerald-400/80"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Live Agent Optimization Pipeline</h2>
+                    <p class="text-slate-400 max-w-md text-sm mt-2">Adjust your parameters and query your live Azure AI Foundry Agent to retrieve grounded, standard-audited trade results.</p>
+                </div>
+
+                <div id="results-pane" style="display:none;" class="space-y-6 animate-fade-in">
+                    <!-- Net Added Value -->
+                    <div class="bg-emerald-500/10 border-2 border-emerald-500/20 rounded-2xl p-5 flex items-center justify-between shadow-lg shadow-emerald-500/5">
+                        <div>
+                            <span class="text-xs text-emerald-400 uppercase tracking-widest font-bold">Optimal Profit Boost (Fabric IQ)</span>
+                            <h3 class="text-3xl font-black text-white mt-1" id="added-value-amt">$0.00</h3>
+                        </div>
+                        <div class="bg-emerald-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase shadow-md shadow-emerald-500/10 flex items-center gap-1">
+                            <i data-lucide="trending-up" class="w-4 h-4"></i> Recommended Route
+                        </div>
+                    </div>
+
+                    <!-- Flow Diagram -->
+                    <div class="grid grid-cols-3 gap-4 items-center justify-center p-4 bg-slate-950/40 rounded-xl border border-slate-800/50">
+                        <div class="text-center bg-slate-900 p-3 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400">Harvest Origin</span>
+                            <div class="font-bold text-white text-sm" id="node-crop">Wheat</div>
+                        </div>
+                        <div class="text-center flex flex-col items-center">
+                            <i data-lucide="arrow-right" class="text-emerald-400 animate-pulse"></i>
+                            <span class="text-[9px] text-emerald-400 font-mono tracking-wider">Foundry Agent RAG Verification</span>
+                        </div>
+                        <div class="text-center bg-emerald-950/30 p-3 rounded-xl border border-emerald-500/30">
+                            <span class="text-xs text-emerald-400">Premium Destination</span>
+                            <div class="font-bold text-white text-sm" id="node-destination">Flour Mill</div>
+                        </div>
+                    </div>
+
+                    <!-- Comparison Grid -->
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-slate-950/40 border border-slate-800/80 p-5 rounded-xl">
+                            <h4 class="text-slate-400 font-bold text-xs uppercase tracking-wider mb-3">🚜 Path A: Direct Commodity Silo</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between"><span>Gross Revenue:</span><span class="font-mono text-white" id="raw-gross">$0</span></div>
+                                <div class="flex justify-between"><span>Transportation Surcharge:</span><span class="font-mono text-slate-400" id="raw-transport">$0</span></div>
+                                <hr class="border-slate-800 my-2">
+                                <div class="flex justify-between font-bold text-slate-300"><span>Net Profit:</span><span class="font-mono" id="raw-net">$0</span></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-emerald-950/10 border border-emerald-500/20 p-5 rounded-xl">
+                            <h4 class="text-emerald-400 font-bold text-xs uppercase tracking-wider mb-3">🏭 Path B: Local Processing Route</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between"><span>Gross Value-Added Sale:</span><span class="font-mono text-white" id="proc-gross">$0</span></div>
+                                <div class="flex justify-between"><span>Processing Costs:</span><span class="font-mono text-red-400" id="proc-cost">$0</span></div>
+                                <div class="flex justify-between"><span>Specialty Certification Bonus:</span><span class="font-mono text-emerald-400" id="proc-bonus">$0</span></div>
+                                <hr class="border-slate-850 my-2">
+                                <div class="flex justify-between font-bold text-emerald-400 text-base"><span>Optimized Profit:</span><span class="font-mono" id="proc-net">$0</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grounded audit response -->
+                    <div id="rule-box" class="bg-indigo-500/5 border border-indigo-500/10 p-4 rounded-xl flex items-start gap-3">
+                        <i data-lucide="shield-check" class="text-indigo-400 shrink-0"></i>
+                        <div>
+                            <span class="text-xs text-indigo-400 font-bold uppercase tracking-wider">Live Agent Grounded Response (Foundry Knowledge Base)</span>
+                            <p class="text-xs text-slate-300 mt-1" id="rule-text">Standard rule text...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl h-52 flex flex-col overflow-hidden">
+                <div class="bg-slate-900 px-5 py-3 border-b border-slate-800 flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="terminal" class="text-emerald-400 animate-pulse"></i> Cognitive Processing Console (Live Feed)
+                    </span>
+                    <span class="text-[9px] bg-slate-800 border border-slate-700 text-slate-400 px-2 py-0.5 rounded font-mono">Agent Logic Nodes</span>
+                </div>
+                <div class="flex-1 overflow-y-auto p-4 font-mono text-xs space-y-2 text-emerald-500/90" id="agent-console">
+                    <div class="text-slate-500">[00:00:01] System boot. Cognitive pipeline initialized successfully. Ready to analyze.</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let chart = null;
+
+        window.onload = () => {
+            lucide.createIcons();
+            initChart('Olive Oil');
+        };
+
+        async function initChart(cropName) {
+            const response = await fetch(`/api/crop/${encodeURIComponent(cropName)}`);
+            const data = await response.json();
+
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Tick 1', 'Tick 2', 'Tick 3', 'Tick 4', 'Tick 5', 'Forecast 1', 'Forecast 2', 'Forecast 3', 'Forecast 4', 'Forecast 5'],
+                    datasets: [{
+                        label: `${cropName} Market Series (USD/MT)`,
+                        data: [...data.history, ...data.forecast],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.03)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#10b981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255, 255, 255, 0.02)' }, ticks: { color: '#94a3b8', font: { size: 9 } } },
+                        y: { grid: { color: 'rgba(255, 255, 255, 0.02)' }, ticks: { color: '#94a3b8', font: { size: 9 } } }
+                    }
+                }
+            });
+        }
+
+        document.getElementById('crop').addEventListener('change', (e) => {
+            initChart(e.target.value);
+            logToConsole(`Fabric IQ: Context shifted. Recalculating trends for ${e.target.value}...`);
+        });
+
+        function logToConsole(text) {
+            const consoleBox = document.getElementById('agent-console');
+            const time = new Date().toLocaleTimeString();
+            const log = document.createElement('div');
+            log.innerHTML = `<span class="text-slate-500">[${time}]</span> ${text}`;
+            consoleBox.appendChild(log);
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        function runImageScan(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const crop = document.getElementById('crop').value;
+            const laser = document.getElementById('scanner-laser');
+            const preview = document.getElementById('scan-preview');
+
+            preview.innerHTML = `<img src="${URL.createObjectURL(file)}" class="object-cover h-full w-full rounded-xl opacity-60">`;
+            laser.style.display = 'block';
+
+            logToConsole(`Foundry Vision Agent: Activating visual sensor tunnel...`);
+            setTimeout(() => logToConsole(`Foundry Vision Agent: Performing neural classification scanning of the crop cells...`), 600);
+
+            // Trigger Quality API call
+            setTimeout(async () => {
+                const response = await fetch('/api/evaluate-quality', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ crop })
+                });
+                const data = await response.json();
+                
+                laser.style.display = 'none';
+                preview.innerHTML = `
+                  <div class="text-left p-3 text-xs space-y-1">
+                    <p class="font-bold text-emerald-400">🤖 Neural Audit Report:</p>
+                    <p><strong>Grade:</strong> ${data.grade}</p>
+                    <p class="text-slate-400 text-[10px] mt-1">${data.analysis}</p>
+                  </div>
+                `;
+                logToConsole(`Foundry Vision Agent: Scan completed successfully. Classification match: ${data.grade}. Quality Multiplier applied.`);
+            }, 2500);
+        }
+
+        async function optimizeChain() {
+            const crop = document.getElementById('crop').value;
+            const qtyTons = document.getElementById('qty').value;
+            const isOrganic = document.getElementById('organic').checked;
+
+            logToConsole(`Cognitive Agent: Initializing optimization routing for ${qtyTons} tons of ${crop}...`);
+            setTimeout(() => logToConsole(`Fabric IQ: Establishing semantic relationships for processing plant networks...`), 400);
+            setTimeout(() => logToConsole(`Foundry Agent: Executing thread. Posting message parameters to agent queue...`), 900);
+            setTimeout(() => logToConsole(`Foundry Agent: Run initiated. RAG Index searching and polling live state...`), 1400);
+
+            try {
+                const response = await fetch('/api/optimize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ crop, qtyTons, isOrganic })
+                });
+                const data = await response.json();
+
+                setTimeout(() => {
+                    document.getElementById('welcome-pane').style.display = 'none';
+                    document.getElementById('results-pane').style.display = 'block';
+
+                    document.getElementById('added-value-amt').innerText = `$${data.addedValue.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                    document.getElementById('node-crop').innerText = `${crop} (${qtyTons} MT)`;
+                    document.getElementById('node-destination').innerText = data.processedPath.processor;
+
+                    document.getElementById('raw-gross').innerText = `$${data.rawPath.gross.toLocaleString()}`;
+                    document.getElementById('raw-transport').innerText = `-$${data.rawPath.transport.toLocaleString()}`;
+                    document.getElementById('raw-net').innerText = `$${data.rawPath.net.toLocaleString()}`;
+
+                    document.getElementById('proc-gross').innerText = `$${data.processedPath.gross.toLocaleString()}`;
+                    document.getElementById('proc-cost').innerText = `-$${data.processedPath.processingCost.toLocaleString()}`;
+                    document.getElementById('proc-bonus').innerText = `+$${data.processedPath.organicBonus.toLocaleString()}`;
+                    document.getElementById('proc-net').innerText = `$${data.processedPath.net.toLocaleString()}`;
+
+                    document.getElementById('rule-text').innerText = data.processedPath.foundryIQRule;
+
+                    logToConsole(`🎉 Pipeline Optimization Completed! Grounded Agent Response Processed.`);
+                }, 2000);
+
+            } catch (err) {
+                logToConsole(`❌ Error: Connection to Foundry Agent endpoint failed.`);
+            }
+        }
+    </script>
+</body>
+</html>

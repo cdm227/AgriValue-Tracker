@@ -1,0 +1,16 @@
+{
+  "name": "agrivalue-ai-terminal",
+  "version": "2.0.0",
+  "description": "High-fidelity Sicilian agricultural value-chain terminal with visual quality scanning and Higgsfield video marketing.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@azure/identity": "^4.2.1",
+    "@azure/keyvault-secrets": "^4.8.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}
