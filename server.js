@@ -16,192 +16,177 @@ const __dirname = path.dirname(__filename);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// --- 🛡️ Crash-Proof Azure Key Vault ---
+let secretClient = null;
 const vaultName = process.env.KEYVAULT_NAME;
-const vaultUrl = `https://${vaultName}.vault.azure.net`;
 
-const credential = new DefaultAzureCredential();
-const secretClient = new SecretClient(vaultUrl, credential);
+if (vaultName && vaultName !== "agrivalue-secure-vault") {
+  try {
+    const vaultUrl = `https://${vaultName}.vault.azure.net`;
+    const credential = new DefaultAzureCredential();
+    secretClient = new SecretClient(vaultUrl, credential);
+  } catch (err) {
+    console.warn("⚠️ Azure Key Vault startup authentication failed.");
+  }
+}
 
 async function getSecureSecret(secretName) {
+  if (!secretClient) return process.env[secretName.replace(/-/g, '_')];
   try {
     const secret = await secretClient.getSecret(secretName);
     return secret.value;
   } catch (err) {
-    console.warn(`⚠️ Key Vault lookup failed for secret [${secretName}]. Falling back to local env.`);
     return process.env[secretName.replace(/-/g, '_')];
   }
 }
 
-// PREMIUM SICILIAN CROP DATABASE (Fabric IQ)
-const mockFabricIQ = {
-  crops: {
-    "Olive Oil": { basePrice: 1200, processedPrice: 6800, processedName: "Extra Virgin Olive Oil DOP", history: [1100, 1150, 1180, 1220, 1200], forecast: [1250, 1300, 1380, 1450, 1550] },
-    "Grapes": { basePrice: 850, processedPrice: 3200, processedName: "Premium Nero d'Avola DOC", history: [800, 820, 840, 830, 850], forecast: [880, 920, 960, 1010, 1080] },
-    "Wheat": { basePrice: 220, processedPrice: 380, processedName: "Premium Organic Semolina Flour", history: [205, 210, 215, 208, 220], forecast: [225, 230, 242, 250, 265] },
-    "Coffee": { basePrice: 3200, processedPrice: 5400, processedName: "Specialty Roasted Beans", history: [3000, 3100, 3150, 3120, 3200], forecast: [3300, 3450, 3600, 3800, 4000] },
-    "Milk": { basePrice: 410, processedPrice: 2200, processedName: "Artisanal Aged Cheddar", history: [390, 400, 395, 405, 410], forecast: [420, 440, 470, 500, 530] }
+// REAL-WORLD SICILIAN SPECIFICATIONS (MatteoLogistics & SofiaDOP)
+const sicilianSpecs = {
+  "Olive Oil": {
+    rawPricePerTon: 1200,
+    processedPricePerLiter: 18,
+    yieldPercent: 0.15,
+    millingCostPerTon: 350,
+    bottlingCostPerLiter: 1.50,
+    certificationFlatFee: 150
   },
-  processors: [
-    { name: "Frantoio Oleario Siciliano", inputs: "Olive Oil", costs: 350 },
-    { name: "Cantina Nero d'Avola", inputs: "Grapes", costs: 250 },
-    { name: "Green Valley Mill", inputs: "Wheat", costs: 30 },
-    { name: "Artisanal Roasters Ltd", inputs: "Coffee", costs: 180 },
-    { name: "Highland Cheese Plant", inputs: "Milk", costs: 250 }
-  ]
+  "Grapes": {
+    rawPricePerTon: 850,
+    processedPricePerBottle: 6.50,
+    yieldPercent: 0.70,
+    crushingCostPerTon: 250,
+    bottlingCostPerBottle: 2.00,
+    certificationFlatFee: 200
+  }
 };
 
-app.get('/api/crop/:name', (req, res) => {
-  const crop = mockFabricIQ.crops[req.params.name];
-  if (!crop) return res.status(404).json({ error: "Crop not found" });
-  res.json(crop);
-});
-
-async function pollRun(threadId, runId, apiKey, endpoint) {
-  const url = `${endpoint}/openai/threads/${threadId}/runs/${runId}?api-version=2024-02-15-preview`;
-  while (true) {
-    const res = await fetch(url, { headers: { 'api-key': apiKey } });
-    const data = await res.json();
-    if (data.status === 'completed') return data;
-    if (data.status === 'failed' || data.status === 'cancelled') throw new Error(`Agent run: ${data.status}`);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  }
-}
-
-// API: Visual Crop Quality Evaluator (Simulation)
-app.post('/api/evaluate-quality', (req, res) => {
-  const { crop } = req.body;
-  if (!crop) return res.status(400).json({ error: "No crop specified" });
-
-  let qualityGrade = "Grade B (Standard)";
-  let analysisText = "";
-  let bonusMultiplier = 1.0;
-
-  if (crop === "Olive Oil") {
-    qualityGrade = "Grade A+ (Premium Cold-Extraction)";
-    analysisText = "Acidity: 0.18% (Ultra-low, excellent), Peroxide: 3.2 mEq/kg (High purity), Color: Vibrant Emerald-Gold. Classification: Extra Virgin Olive Oil DOP criteria met.";
-    bonusMultiplier = 1.15;
-  } else if (crop === "Grapes") {
-    qualityGrade = "Grade A (DOC Appellation Class)";
-    analysisText = "Sugar Content: 22.4° Brix (Perfect for fermentation), Acid Balance: High, Skin integrity: 98% undamaged. Classification: High-grade Nero d'Avola DOC wine potential.";
-    bonusMultiplier = 1.10;
-  } else {
-    qualityGrade = "Grade A (Standard Premium)";
-    analysisText = "Moisture Level: 12.8% (Highly stable), Grain Uniformity: 96%. Classification: Premium tier.";
-    bonusMultiplier = 1.05;
-  }
-
-  res.json({
-    crop,
-    grade: qualityGrade,
-    analysis: analysisText,
-    multiplier: bonusMultiplier
-  });
-});
-
-// API: Secured Value Chain Optimization with Telemetry Logging
+// API: Value-Chain Optimization representing the Collaborative Agents
 app.post('/api/optimize', async (req, res) => {
-  const { crop, qtyTons, isOrganic } = req.body;
+  const { crop, qtyTons, qualityMetric, isOrganic } = req.body;
   if (!crop || !qtyTons) return res.status(400).json({ error: "Missing parameters" });
 
-  const cropData = mockFabricIQ.crops[crop];
-  const processor = mockFabricIQ.processors.find(p => p.inputs === crop);
+  const spec = sicilianSpecs[crop];
+  const logs = [];
 
-  let foundryRule = "Verified Organic/Fair-Trade guidelines.";
+  // Don Salvatore (Coordinator) Intercepts
+  logs.push({ agent: "Don Salvatore (Coordinator)", text: `[1] Intercepted cargo: ${qtyTons} tons of ${crop}. Quality metric: ${qualityMetric}. Delegating audits...` });
+
+  // Sofia (DOP Scribe) Checks Compliance
+  logs.push({ agent: "Sofia (Scribe Agent)", text: `[2] Auditing agronomical parameters against DOP/DOC Sicilia guidelines...` });
+  
+  let foundryRule = "";
   let bonusApplied = 0;
 
-  const azureApiKey = await getSecureSecret("AZURE-OPENAI-API-KEY");
-  const agentId = process.env.AZURE_AI_AGENT_ID;
-  const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
-
-  // --- TELEMETRY LOG FOR FOUNDRY TRACES ---
-  console.log(`[FOUNDRY TRACE] ${new Date().toISOString()} - Optimizing Crop: ${crop} | Qty: ${qtyTons} Tons | Organic: ${isOrganic}`);
-
-  if (azureApiKey && agentId && endpoint) {
-    try {
-      const apiVersion = "2024-02-15-preview";
-      console.log(`[FOUNDRY TRACE] Initiating session run for Agent ID: ${agentId}`);
-
-      const threadRes = await fetch(`${endpoint}/openai/threads?api-version=${apiVersion}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'api-key': azureApiKey }
-      });
-      const thread = await threadRes.json();
-
-      await fetch(`${endpoint}/openai/threads/${thread.id}/messages?api-version=${apiVersion}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'api-key': azureApiKey },
-        body: JSON.stringify({
-          role: "user",
-          content: `Farmer has ${qtyTons} tons of ${crop}. Is Organic check: ${isOrganic}. Query your knowledge files and output compliance rule and premium bonus.`
-        })
-      });
-
-      const runRes = await fetch(`${endpoint}/openai/threads/${thread.id}/runs?api-version=${apiVersion}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'api-key': azureApiKey },
-        body: JSON.stringify({ assistant_id: agentId })
-      });
-      const run = await runRes.json();
-
-      await pollRun(thread.id, run.id, azureApiKey, endpoint);
-
-      const msgRes = await fetch(`${endpoint}/openai/threads/${thread.id}/messages?api-version=${apiVersion}`, {
-        headers: { 'api-key': azureApiKey }
-      });
-      const msgs = await msgRes.json();
-      
-      const agentReply = msgs.data[0]?.content[0]?.text?.value;
-      if (agentReply) {
-        foundryRule = agentReply;
-        const bonusMatch = agentReply.match(/\$?([0-9]+)\/ton/);
-        bonusApplied = bonusMatch ? parseInt(bonusMatch[1]) : (isOrganic ? 90 : 0);
-      }
-      
-      console.log(`[FOUNDRY TRACE] Run Completed Successfully. Reply Grounded: ${!!agentReply}`);
-
-    } catch (err) {
-      console.warn("[FOUNDRY TRACE] Error connecting to live agent:", err.message);
+  if (crop === "Olive Oil") {
+    if (parseFloat(qualityMetric) <= 0.3) {
+      bonusApplied = 450;
+      foundryRule = "✓ SUCCESS: Acidity verified at " + qualityMetric + "% (<= 0.3% threshold). Unlocked Olio DOP Sicilia extra premium bonus of +$450/ton.";
+    } else {
+      foundryRule = "❌ FAILED: Acidity is " + qualityMetric + "% (exceeds 0.3% limit). Crop fails to qualify for Olio DOP Sicilia. Selling at raw base rates.";
+    }
+  } else if (crop === "Grapes") {
+    if (parseFloat(qualityMetric) >= 21.0) {
+      bonusApplied = 300;
+      foundryRule = "✓ SUCCESS: Sugar level verified at " + qualityMetric + " Brix (>= 21 Brix limit). Unlocked Nero d'Avola DOC Sicilia appellation premium of +$300/ton.";
+    } else {
+      foundryRule = "❌ FAILED: Sugar density is " + qualityMetric + " Brix (below 21 Brix limit). Crop fails to qualify for DOC appellation.";
     }
   }
 
-  const rawRev = cropData.basePrice * qtyTons;
-  const rawTransport = 100;
-  const rawNet = rawRev - rawTransport;
-
-  const procCost = processor.costs * qtyTons;
-  let procRev = cropData.processedPrice * qtyTons;
+  // Matteo (Logistics) Calculates Conversions
+  logs.push({ agent: "Matteo (Logistics Agent)", text: `[3] Computing physical yields and cooperative cost ledgers...` });
   
-  if (bonusApplied === 0 && isOrganic) {
-    const organicBonuses = { "Olive Oil": 450, "Grapes": 300, "Wheat": 45, "Coffee": 250, "Milk": 90 };
-    bonusApplied = organicBonuses[crop] * qtyTons;
-  } else {
-    bonusApplied = bonusApplied * qtyTons;
-  }
-  procRev += bonusApplied;
+  const rawGross = spec.rawPricePerTon * qtyTons;
+  const rawTransport = 100;
+  const rawNet = rawGross - rawTransport;
 
+  const millingCost = spec.millingCostPerTon * qtyTons;
+  let yieldAmount = qtyTons * 1000 * spec.yieldPercent;
+  let yieldUnit = "Liters of Oil";
+
+  if (crop === "Grapes") {
+    yieldAmount = Math.floor(yieldAmount / 0.75); // Bottles
+    yieldUnit = "Bottles of Wine";
+  }
+
+  const packagingCost = (crop === "Olive Oil" ? spec.bottlingCostPerLiter : spec.bottlingCostPerBottle) * yieldAmount;
+  let processedGross = yieldAmount * (crop === "Olive Oil" ? spec.processedPricePerLiter : spec.processedPricePerBottle);
+  
+  const qualityBonus = bonusApplied * qtyTons;
+  processedGross += qualityBonus;
+
+  const totalProcCost = millingCost + packagingCost + spec.certificationFlatFee;
   const procTransport = 150;
-  const procNet = procRev - procCost - procTransport;
+  const procNet = processedGross - totalProcCost - procTransport;
   const netAddedValue = Math.max(0, procNet - rawNet);
+
+  logs.push({ agent: "Don Salvatore (Coordinator)", text: `[4] Analysis complete! Compiling final cooperative trade agreement contract.` });
 
   res.json({
     crop,
     qtyTons,
-    isOrganic,
-    rawPath: { gross: rawRev, transport: rawTransport, net: rawNet },
+    yieldAmount,
+    yieldUnit,
+    rawPath: { gross: rawGross, transport: rawTransport, net: rawNet },
     processedPath: {
-      processor: processor.name,
-      processedProduct: cropData.processedName,
-      gross: procRev,
-      processingCost: procCost,
+      gross: processedGross,
+      milling: millingCost,
+      packaging: packagingCost,
+      flatFee: spec.certificationFlatFee,
+      totalCost: totalProcCost,
       transport: procTransport,
       net: procNet,
-      foundryIQRule: foundryRule,
-      organicBonus: bonusApplied
+      qualityBonus,
+      foundryIQRule: foundryRule
     },
-    addedValue: netAddedValue
+    addedValue: netAddedValue,
+    logs
   });
 });
 
+// API: Live Chatbot Advisor
+app.post('/api/chat', async (req, res) => {
+  const { message, crop } = req.body;
+  if (!message) return res.status(400).json({ error: "Missing message" });
+
+  let reply = "The Sicilian Agricultural cooperative welcomes your query. Please ask specifically about Olio DOP or Nero d'Avola grape pressing standards.";
+
+  const azureApiKey = await getSecureSecret("AZURE-OPENAI-API-KEY");
+  const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
+
+  if (azureApiKey && endpoint) {
+    try {
+      const url = `${endpoint}/openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-4o'}/chat/completions?api-version=2024-02-15-preview`;
+      const aiRes = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'api-key': azureApiKey },
+        body: JSON.stringify({
+          messages: [
+            { role: "system", content: "You are Don Salvatore, a Sicilian agricultural expert. Give advice on how to improve crop quality (e.g. lowering acidity below 0.3% for Olive Oil, or aiming for 21 Brix sugar for Wine grapes), how to certified for DOP Sicilia / DOC wine, and how cooperative milling at Frantoi/Cantine increases profit margins." },
+            { role: "user", content: `Query Context: Crop is ${crop}. Farmer asks: ${message}` }
+          ],
+          max_tokens: 250,
+          temperature: 0.2
+        })
+      });
+      if (aiRes.ok) {
+        const aiData = await aiRes.json();
+        reply = aiData.choices[0].message.content;
+      }
+    } catch (err) {
+      console.warn("⚠️ Chatbot API failed, utilizing fallback response.");
+    }
+  } else {
+    if (crop === "Olive Oil") {
+      reply = "To qualify for the DOP Sicilia certification, your olive acidity must remain below 0.3%. Ensure you transport your harvest to the Frantoio Oleario within 8 hours of picking, and enforce a cold-milling temperature strictly below 27°C. This will increase your oil valuation by +$450/ton.";
+    } else if (crop === "Grapes") {
+      reply = "To produce Nero d'Avola DOC Sicilia wine, aim for a grape sugar content of at least 21° Brix during harvesting. Ensure slow maceration and Oak aging at the Cantina. This qualifies your wine for DOC appellation labeling, adding a premium bonus of +$300/ton.";
+    }
+  }
+
+  res.json({ reply });
+});
+
 app.listen(PORT, () => {
-  console.log(`🛡️ Enterprise-secured AgriValue server running on http://localhost:${PORT}`);
+  console.log(`🛡️ Nero's Vineyard server running on http://localhost:${PORT}`);
 });

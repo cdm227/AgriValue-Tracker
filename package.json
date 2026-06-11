@@ -1,16 +1,20 @@
 {
-  "name": "agrivalue-ai-terminal",
+  "name": "fieldmind-sicily",
   "version": "2.0.0",
-  "description": "High-fidelity Sicilian agricultural value-chain terminal with visual quality scanning and Higgsfield video marketing.",
-  "main": "server.js",
+  "description": "AI-powered agronomist for Sicilian smallholder cooperatives.",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "dev": "vite",
+    "build": "vite build"
   },
   "dependencies": {
-    "@azure/identity": "^4.2.1",
-    "@azure/keyvault-secrets": "^4.8.0",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "@vitejs/plugin-react": "^6.0.2",
+    "chart.js": "^4.4.3",
+    "lucide-react": "^0.395.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "vite": "^8.0.16"
   }
 }
