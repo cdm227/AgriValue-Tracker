@@ -1,13 +1,16 @@
 # Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
 on:
-  # Run deployment when code is pushed to prod
+  # Deploy only when code is pushed to prod
   push:
     branches: ["prod"]
-  # Run validation for PRs targeting prod (build only, no deploy)
+
+  # Validate PRs targeting prod (build only, no deploy)
   pull_request:
     branches: ["prod"]
-  # Allow manual runs from the Actions tab
+    types: [opened, synchronize, reopened]
+
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 # Permissions required for Pages deployment
 permissions:
@@ -42,9 +45,9 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: "./public"
-  # Deploy job runs only on push to prod (not on pull_request)
+  # Deploy job runs only on push/manual events (not PR validation runs)
   deploy:
-    if: github.event_name == 'push'
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     environment:
