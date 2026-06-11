@@ -4,57 +4,123 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { DefaultAzureCredential } from "@azure/identity";
 import { SecretClient } from "@azure/keyvault-secrets";
+import {
+  getCrop,
+  evaluateQuality,
+  optimizeValueChain,
+  generateSupplyContract,
+  getProcessorNetwork,
+  getAdvisorReply,
+  getCropInsights,
+  getPortfolioInsights,
+  syncFabricGraph,
+  getFabricStatus,
+} from './lib/iq-data.js';
+import { getWorkIQStatus, notifyOptimizationComplete, notifyContractGenerated } from './lib/work-iq.js';
 
 dotenv.config();
 
 const app = express();
+app.set('trust proxy', 1); // Azure App Service runs behind a proxy — needed for per-IP rate limits
 const PORT = process.env.PORT || 3000;
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'https://cdm227.github.io,http://localhost:3000').split(',').map(s => s.trim());
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+function sameRequestHost(source, req) {
+  try {
+    const sourceUrl = new URL(source);
+    const host = req.headers["x-forwarded-host"] || req.headers.host;
+    return sourceUrl.host === host;
+  } catch {
+    return false;
+  }
+}
+
+function isAllowedOrigin(origin, req) {
+  if (!origin) return true;
+  if (sameRequestHost(origin, req)) return true;
+  return ALLOWED_ORIGINS.some(o => origin === o || origin.startsWith(o.replace(/\/$/, '')));
+}
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && isAllowedOrigin(origin, req)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
+// Origin gate: reject browser API calls from foreign sites (CORS alone doesn't block the request server-side)
+app.use('/api', (req, res, next) => {
+  const source = req.headers.origin || req.headers.referer;
+  if (source && !isAllowedOrigin(source, req)) {
+    console.warn(`[SECURITY] Blocked foreign origin: ${source} → ${req.path}`);
+    return res.status(403).json({ error: "Origin not allowed" });
+  }
+  next();
+});
+
+// Lightweight in-memory rate limiter (per IP, sliding window)
+const rateBuckets = new Map();
+function rateLimit(windowMs, max) {
+  return (req, res, next) => {
+    const key = `${req.ip}:${windowMs}:${max}`;
+    const now = Date.now();
+    const hits = (rateBuckets.get(key) || []).filter(t => now - t < windowMs);
+    if (hits.length >= max) {
+      return res.status(429).json({ error: "Too many requests — slow down" });
+    }
+    hits.push(now);
+    rateBuckets.set(key, hits);
+    next();
+  };
+}
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, hits] of rateBuckets) {
+    const alive = hits.filter(t => now - t < 600000);
+    if (alive.length === 0) rateBuckets.delete(key); else rateBuckets.set(key, alive);
+  }
+}, 60000).unref();
+
+app.use('/api', rateLimit(60000, 60));                       // 60 req/min — all API
+const expensiveLimit = rateLimit(300000, 15);                // 15 req/5min — Azure-backed routes
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const vaultName = process.env.KEYVAULT_NAME;
-const vaultUrl = `https://${vaultName}.vault.azure.net`;
+let secretClient = null;
 
-const credential = new DefaultAzureCredential();
-const secretClient = new SecretClient(vaultUrl, credential);
-
-async function getSecureSecret(secretName) {
-  try {
-    const secret = await secretClient.getSecret(secretName);
-    return secret.value;
-  } catch (err) {
-    console.warn(`⚠️ Key Vault lookup failed for secret [${secretName}]. Falling back to local env.`);
-    return process.env[secretName.replace(/-/g, '_')];
-  }
+if (vaultName) {
+  const vaultUrl = `https://${vaultName}.vault.azure.net`;
+  secretClient = new SecretClient(vaultUrl, new DefaultAzureCredential());
 }
 
-// PREMIUM SICILIAN CROP DATABASE (Fabric IQ)
-const mockFabricIQ = {
-  crops: {
-    "Olive Oil": { basePrice: 1200, processedPrice: 6800, processedName: "Extra Virgin Olive Oil DOP", history: [1100, 1150, 1180, 1220, 1200], forecast: [1250, 1300, 1380, 1450, 1550] },
-    "Grapes": { basePrice: 850, processedPrice: 3200, processedName: "Premium Nero d'Avola DOC", history: [800, 820, 840, 830, 850], forecast: [880, 920, 960, 1010, 1080] },
-    "Wheat": { basePrice: 220, processedPrice: 380, processedName: "Premium Organic Semolina Flour", history: [205, 210, 215, 208, 220], forecast: [225, 230, 242, 250, 265] },
-    "Coffee": { basePrice: 3200, processedPrice: 5400, processedName: "Specialty Roasted Beans", history: [3000, 3100, 3150, 3120, 3200], forecast: [3300, 3450, 3600, 3800, 4000] },
-    "Milk": { basePrice: 410, processedPrice: 2200, processedName: "Artisanal Aged Cheddar", history: [390, 400, 395, 405, 410], forecast: [420, 440, 470, 500, 530] }
-  },
-  processors: [
-    { name: "Frantoio Oleario Siciliano", inputs: "Olive Oil", costs: 350 },
-    { name: "Cantina Nero d'Avola", inputs: "Grapes", costs: 250 },
-    { name: "Green Valley Mill", inputs: "Wheat", costs: 30 },
-    { name: "Artisanal Roasters Ltd", inputs: "Coffee", costs: 180 },
-    { name: "Highland Cheese Plant", inputs: "Milk", costs: 250 }
-  ]
-};
+async function getSecureSecret(secretName) {
+  if (secretClient) {
+    try {
+      const secret = await secretClient.getSecret(secretName);
+      return secret.value;
+    } catch {
+      console.warn(`⚠️ Key Vault lookup failed for [${secretName}]`);
+    }
+  }
+  return process.env[secretName.replace(/-/g, '_')];
+}
 
-app.get('/api/crop/:name', (req, res) => {
-  const crop = mockFabricIQ.crops[req.params.name];
-  if (!crop) return res.status(404).json({ error: "Crop not found" });
-  res.json(crop);
-});
+async function getFoundryAuthHeaders(apiKey) {
+  if (apiKey) return { "api-key": apiKey };
+
+  const token = await new DefaultAzureCredential().getToken("https://ai.azure.com/.default");
+  if (!token?.token) throw new Error("Unable to acquire Azure AI Foundry bearer token");
+  return { Authorization: `Bearer ${token.token}` };
+}
 
 async function pollRun(threadId, runId, apiKey, endpoint) {
   const url = `${endpoint}/openai/threads/${threadId}/runs/${runId}?api-version=2024-02-15-preview`;
@@ -63,145 +129,262 @@ async function pollRun(threadId, runId, apiKey, endpoint) {
     const data = await res.json();
     if (data.status === 'completed') return data;
     if (data.status === 'failed' || data.status === 'cancelled') throw new Error(`Agent run: ${data.status}`);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(r => setTimeout(r, 1000));
   }
 }
 
-// API: Visual Crop Quality Evaluator (Simulation)
-app.post('/api/evaluate-quality', (req, res) => {
-  const { crop } = req.body;
-  if (!crop) return res.status(400).json({ error: "No crop specified" });
+function parseFoundryText(data) {
+  if (!data) return null;
+  if (typeof data.output_text === "string") return data.output_text;
+  if (typeof data.text === "string") return data.text;
 
-  let qualityGrade = "Grade B (Standard)";
-  let analysisText = "";
-  let bonusMultiplier = 1.0;
-
-  if (crop === "Olive Oil") {
-    qualityGrade = "Grade A+ (Premium Cold-Extraction)";
-    analysisText = "Acidity: 0.18% (Ultra-low, excellent), Peroxide: 3.2 mEq/kg (High purity), Color: Vibrant Emerald-Gold. Classification: Extra Virgin Olive Oil DOP criteria met.";
-    bonusMultiplier = 1.15;
-  } else if (crop === "Grapes") {
-    qualityGrade = "Grade A (DOC Appellation Class)";
-    analysisText = "Sugar Content: 22.4° Brix (Perfect for fermentation), Acid Balance: High, Skin integrity: 98% undamaged. Classification: High-grade Nero d'Avola DOC wine potential.";
-    bonusMultiplier = 1.10;
-  } else {
-    qualityGrade = "Grade A (Standard Premium)";
-    analysisText = "Moisture Level: 12.8% (Highly stable), Grain Uniformity: 96%. Classification: Premium tier.";
-    bonusMultiplier = 1.05;
+  const output = Array.isArray(data.output) ? data.output : [];
+  for (const item of output) {
+    const content = Array.isArray(item.content) ? item.content : [];
+    for (const part of content) {
+      if (typeof part.text === "string") return part.text;
+      if (typeof part.output_text === "string") return part.output_text;
+    }
   }
 
-  res.json({
-    crop,
-    grade: qualityGrade,
-    analysis: analysisText,
-    multiplier: bonusMultiplier
+  const choices = Array.isArray(data.choices) ? data.choices : [];
+  return choices[0]?.message?.content ?? choices[0]?.text ?? null;
+}
+
+async function queryFoundryResponsesAgent({ crop, qtyTons, isOrganic }) {
+  const baseUrl = process.env.FOUNDRY_OPENAI_BASE_URL?.replace(/\/$/, "");
+  const endpoint = process.env.FOUNDRY_RESPONSES_ENDPOINT || (baseUrl ? `${baseUrl}/responses` : null);
+  const model = process.env.FOUNDRY_MODEL_DEPLOYMENT || "gpt-4o";
+  const apiKey = await getSecureSecret("FOUNDRY-API-KEY");
+  if (!endpoint) return null;
+
+  const prompt = [
+    "You are AgriValue Advisor, a Microsoft Foundry agent for agricultural value-chain optimization.",
+    `Farmer scenario: ${qtyTons} metric tons of ${crop}.`,
+    `Certified organic/DOP/DOC flag: ${isOrganic}.`,
+    "Use your grounded project knowledge and answer with:",
+    "1. applicable compliance rule",
+    "2. required evidence/documents",
+    "3. premium bonus as $X/ton if eligible",
+    "4. one concise recommendation for Path B processing.",
+  ].join("\n");
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...(await getFoundryAuthHeaders(apiKey)),
+  };
+
+  const body = endpoint.includes("/openai/v1/")
+    ? { model, input: prompt }
+    : { input: prompt };
+
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
   });
-});
 
-// API: Secured Value Chain Optimization with Telemetry Logging
-app.post('/api/optimize', async (req, res) => {
-  const { crop, qtyTons, isOrganic } = req.body;
-  if (!crop || !qtyTons) return res.status(400).json({ error: "Missing parameters" });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Foundry Responses API ${res.status}: ${body.slice(0, 240)}`);
+  }
 
-  const cropData = mockFabricIQ.crops[crop];
-  const processor = mockFabricIQ.processors.find(p => p.inputs === crop);
+  return parseFoundryText(await res.json());
+}
 
-  let foundryRule = "Verified Organic/Fair-Trade guidelines.";
-  let bonusApplied = 0;
+async function queryFoundryAgent({ crop, qtyTons, isOrganic }) {
+  const responsesReply = await queryFoundryResponsesAgent({ crop, qtyTons, isOrganic });
+  if (responsesReply) return responsesReply;
 
   const azureApiKey = await getSecureSecret("AZURE-OPENAI-API-KEY");
   const agentId = process.env.AZURE_AI_AGENT_ID;
   const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
+  if (!azureApiKey || !agentId || !endpoint) return null;
 
-  // --- TELEMETRY LOG FOR FOUNDRY TRACES ---
-  console.log(`[FOUNDRY TRACE] ${new Date().toISOString()} - Optimizing Crop: ${crop} | Qty: ${qtyTons} Tons | Organic: ${isOrganic}`);
+  const apiVersion = "2024-02-15-preview";
+  const threadRes = await fetch(`${endpoint}/openai/threads?api-version=${apiVersion}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'api-key': azureApiKey }
+  });
+  const thread = await threadRes.json();
 
-  if (azureApiKey && agentId && endpoint) {
-    try {
-      const apiVersion = "2024-02-15-preview";
-      console.log(`[FOUNDRY TRACE] Initiating session run for Agent ID: ${agentId}`);
+  await fetch(`${endpoint}/openai/threads/${thread.id}/messages?api-version=${apiVersion}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'api-key': azureApiKey },
+    body: JSON.stringify({
+      role: "user",
+      content: `Farmer has ${qtyTons} tons of ${crop}. Organic certified: ${isOrganic}. Query knowledge files. Output compliance rule and premium bonus as $X/ton.`
+    })
+  });
 
-      const threadRes = await fetch(`${endpoint}/openai/threads?api-version=${apiVersion}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'api-key': azureApiKey }
-      });
-      const thread = await threadRes.json();
+  const runRes = await fetch(`${endpoint}/openai/threads/${thread.id}/runs?api-version=${apiVersion}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'api-key': azureApiKey },
+    body: JSON.stringify({ assistant_id: agentId })
+  });
+  const run = await runRes.json();
+  await pollRun(thread.id, run.id, azureApiKey, endpoint);
 
-      await fetch(`${endpoint}/openai/threads/${thread.id}/messages?api-version=${apiVersion}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'api-key': azureApiKey },
-        body: JSON.stringify({
-          role: "user",
-          content: `Farmer has ${qtyTons} tons of ${crop}. Is Organic check: ${isOrganic}. Query your knowledge files and output compliance rule and premium bonus.`
-        })
-      });
+  const msgRes = await fetch(`${endpoint}/openai/threads/${thread.id}/messages?api-version=${apiVersion}`, {
+    headers: { 'api-key': azureApiKey }
+  });
+  const msgs = await msgRes.json();
+  return msgs.data[0]?.content[0]?.text?.value ?? null;
+}
 
-      const runRes = await fetch(`${endpoint}/openai/threads/${thread.id}/runs?api-version=${apiVersion}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'api-key': azureApiKey },
-        body: JSON.stringify({ assistant_id: agentId })
-      });
-      const run = await runRes.json();
+function foundryConfigured() {
+  return Boolean(
+    process.env.FOUNDRY_RESPONSES_ENDPOINT ||
+    process.env.FOUNDRY_OPENAI_BASE_URL ||
+    (process.env.AZURE_AI_AGENT_ID && process.env.AZURE_OPENAI_ENDPOINT)
+  );
+}
 
-      await pollRun(thread.id, run.id, azureApiKey, endpoint);
-
-      const msgRes = await fetch(`${endpoint}/openai/threads/${thread.id}/messages?api-version=${apiVersion}`, {
-        headers: { 'api-key': azureApiKey }
-      });
-      const msgs = await msgRes.json();
-      
-      const agentReply = msgs.data[0]?.content[0]?.text?.value;
-      if (agentReply) {
-        foundryRule = agentReply;
-        const bonusMatch = agentReply.match(/\$?([0-9]+)\/ton/);
-        bonusApplied = bonusMatch ? parseInt(bonusMatch[1]) : (isOrganic ? 90 : 0);
-      }
-      
-      console.log(`[FOUNDRY TRACE] Run Completed Successfully. Reply Grounded: ${!!agentReply}`);
-
-    } catch (err) {
-      console.warn("[FOUNDRY TRACE] Error connecting to live agent:", err.message);
-    }
-  }
-
-  const rawRev = cropData.basePrice * qtyTons;
-  const rawTransport = 100;
-  const rawNet = rawRev - rawTransport;
-
-  const procCost = processor.costs * qtyTons;
-  let procRev = cropData.processedPrice * qtyTons;
-  
-  if (bonusApplied === 0 && isOrganic) {
-    const organicBonuses = { "Olive Oil": 450, "Grapes": 300, "Wheat": 45, "Coffee": 250, "Milk": 90 };
-    bonusApplied = organicBonuses[crop] * qtyTons;
-  } else {
-    bonusApplied = bonusApplied * qtyTons;
-  }
-  procRev += bonusApplied;
-
-  const procTransport = 150;
-  const procNet = procRev - procCost - procTransport;
-  const netAddedValue = Math.max(0, procNet - rawNet);
-
+app.get('/api/status', async (_req, res) => {
+  const fabric = getFabricStatus();
+  const work = getWorkIQStatus();
   res.json({
-    crop,
-    qtyTons,
-    isOrganic,
-    rawPath: { gross: rawRev, transport: rawTransport, net: rawNet },
-    processedPath: {
-      processor: processor.name,
-      processedProduct: cropData.processedName,
-      gross: procRev,
-      processingCost: procCost,
-      transport: procTransport,
-      net: procNet,
-      foundryIQRule: foundryRule,
-      organicBonus: bonusApplied
-    },
-    addedValue: netAddedValue
+    fabricIQ: fabric,
+    foundryIQ: { configured: foundryConfigured(), live: foundryConfigured() },
+    workIQ: work,
+    version: '3.0.0',
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🛡️ Enterprise-secured AgriValue server running on http://localhost:${PORT}`);
+app.get('/api/processors', (_req, res) => {
+  res.json(getProcessorNetwork());
 });
+
+app.get('/api/crop/:name', (req, res) => {
+  const crop = getCrop(req.params.name);
+  if (!crop) return res.status(404).json({ error: "Crop not found" });
+  res.json(crop);
+});
+
+app.post('/api/evaluate-quality', (req, res) => {
+  const { crop } = req.body;
+  if (!crop) return res.status(400).json({ error: "No crop specified" });
+  res.json(evaluateQuality(crop));
+});
+
+app.post('/api/advisor', expensiveLimit, async (req, res) => {
+  const { message, crop, stream } = req.body;
+  if (!message) return res.status(400).json({ error: "Message required" });
+
+  let reply = getAdvisorReply(message, { crop });
+
+  if (foundryConfigured() && message.length > 20) {
+    try {
+      const agentReply = await queryFoundryAgent({ crop: crop || 'Olive Oil', qtyTons: 10, isOrganic: true });
+      if (agentReply) reply = `${reply}\n\n**Foundry IQ adds:** ${agentReply.slice(0, 500)}`;
+    } catch { /* advisor falls back to rule-based */ }
+  }
+
+  if (stream) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    const words = reply.split(' ');
+    for (const word of words) {
+      res.write(`data: ${JSON.stringify({ token: word + ' ' })}\n\n`);
+      await new Promise(r => setTimeout(r, 30));
+    }
+    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+    return res.end();
+  }
+
+  res.json({ reply });
+});
+
+app.get('/api/insights/portfolio', (req, res) => {
+  const qtyTons = Number(req.query.qty) || 10;
+  res.json(getPortfolioInsights(qtyTons));
+});
+
+app.get('/api/insights/:crop', (req, res) => {
+  const qtyTons = Number(req.query.qty) || 10;
+  const insights = getCropInsights(req.params.crop, qtyTons);
+  if (!insights) return res.status(404).json({ error: "Crop not found" });
+  res.json(insights);
+});
+
+app.post('/api/optimize', expensiveLimit, async (req, res) => {
+  const { crop, qtyTons, isOrganic, qualityMultiplier = 1.0, notifyTeams } = req.body;
+  if (!crop || !qtyTons) return res.status(400).json({ error: "Missing parameters" });
+
+  console.log(`[IQ PIPELINE] ${crop} | ${qtyTons} MT | organic=${isOrganic} | quality=${qualityMultiplier}x`);
+
+  let foundryRule = null;
+  let bonusOverride = 0;
+
+  try {
+    const agentReply = await queryFoundryAgent({ crop, qtyTons, isOrganic });
+    if (agentReply) {
+      foundryRule = agentReply;
+      const bonusMatch = agentReply.match(/\$?([0-9]+)\/ton/);
+      if (bonusMatch) bonusOverride = parseInt(bonusMatch[1]) * qtyTons;
+    }
+  } catch (err) {
+    console.warn("[FOUNDRY IQ]", err.message);
+  }
+
+  const result = optimizeValueChain({ crop, qtyTons, isOrganic, qualityMultiplier });
+
+  if (foundryRule) {
+    result.processedPath.foundryIQRule = foundryRule;
+    if (bonusOverride > 0) {
+      const prev = result.processedPath.organicBonus;
+      result.processedPath.organicBonus = bonusOverride;
+      result.processedPath.gross = result.processedPath.gross - prev + bonusOverride;
+      result.processedPath.net = result.processedPath.gross - result.processedPath.processingCost - result.processedPath.transport;
+      result.addedValue = Math.max(0, result.processedPath.net - result.rawPath.net);
+    }
+  }
+
+  result.iqLayers = {
+    fabric: getFabricStatus().source,
+    foundry: foundryRule ? 'live-agent' : (foundryConfigured() ? 'fallback-rules' : 'local-rules'),
+  };
+
+  if (notifyTeams !== false && getWorkIQStatus().active) {
+    result.workIQ = await notifyOptimizationComplete(result);
+  }
+
+  res.json(result);
+});
+
+app.post('/api/generate-contract', async (req, res) => {
+  const { crop, qtyTons, buyer, isOrganic, notifyTeams } = req.body;
+  if (!crop || !qtyTons) return res.status(400).json({ error: "Missing parameters" });
+
+  const contract = generateSupplyContract({ crop, qtyTons, buyer, isOrganic });
+  if (!contract) return res.status(404).json({ error: "Crop not found" });
+
+  let workIQ = null;
+  if (notifyTeams !== false && getWorkIQStatus().active) {
+    workIQ = await notifyContractGenerated({ crop, qtyTons, buyer });
+  }
+
+  res.json({ contract, workIQ });
+});
+
+app.post('/api/notify-teams', async (req, res) => {
+  const result = req.body;
+  if (!result?.crop) return res.status(400).json({ error: "Optimization result required" });
+  const workIQ = await notifyOptimizationComplete(result);
+  res.json(workIQ);
+});
+
+app.post('/api/fabric/sync', rateLimit(300000, 3), async (_req, res) => {
+  const sync = await syncFabricGraph(true);
+  res.json(sync);
+});
+
+async function bootstrap() {
+  await syncFabricGraph(true);
+  app.listen(PORT, () => {
+    console.log(`🛡️ AgriValue IQ server v3 — http://localhost:${PORT}`);
+    console.log(`   Fabric: ${getFabricStatus().source} | Foundry: ${foundryConfigured() ? 'configured' : 'local'} | Work IQ: ${getWorkIQStatus().active ? 'active' : 'off'}`);
+  });
+}
+
+bootstrap();

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "agrivalue-iq": {
+      "command": "node",
+      "args": ["mcp-server.js"],
+      "cwd": "${workspaceFolder}"
+    }
+  }
+}

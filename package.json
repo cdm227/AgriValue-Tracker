@@ -1,16 +1,22 @@
 {
   "name": "agrivalue-ai-terminal",
-  "version": "2.0.0",
-  "description": "High-fidelity Sicilian agricultural value-chain terminal with visual quality scanning and Higgsfield video marketing.",
+  "version": "3.0.0",
+  "description": "Sicilian agricultural value-chain terminal with Fabric IQ, Foundry IQ, and Copilot MCP integration.",
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "mcp": "node mcp-server.js",
+    "agent:action": "node scripts/agent-action.mjs",
+    "build:static": "node scripts/sync-static-data.js && node scripts/inject-config.js",
+    "prestart": "node scripts/sync-static-data.js"
   },
   "dependencies": {
     "@azure/identity": "^4.2.1",
     "@azure/keyvault-secrets": "^4.8.0",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "mssql": "^11.0.1"
   }
 }

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-stone-950 text-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriValue — Judge Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="config.js"></script>
+    <style>
+        body { font-family: Inter, system-ui, sans-serif; background: #0c0a09; }
+        .glass { background: rgba(28,25,23,.72); border: 1px solid rgba(245,158,11,.16); backdrop-filter: blur(16px); }
+        .step { opacity: .45; transform: scale(.98); transition: all .45s ease; }
+        .step.visible { opacity: 1; transform: scale(1); border-color: rgba(16,185,129,.55); }
+        .agent.active { box-shadow: 0 0 0 1px rgba(16,185,129,.65), 0 16px 40px rgba(16,185,129,.12); transform: translateY(-3px); }
+        .progress { transition: width .3s linear; }
+    </style>
+</head>
+<body class="h-full overflow-hidden">
+    <div class="fixed inset-0 opacity-25 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="relative z-10 h-full grid grid-cols-[420px_1fr]">
+        <aside class="p-6 glass h-full overflow-y-auto">
+            <div class="mb-6">
+                <p class="text-[10px] text-emerald-400 font-black uppercase tracking-[0.3em]">Battle #1 Creative Apps</p>
+                <h1 class="text-4xl font-black mt-2">AgriValue IQ</h1>
+                <p class="text-sm text-stone-300 mt-3 leading-relaxed">A friendly AI story that shows how farmers can turn raw harvest into higher-value products.</p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 mb-6">
+                <div class="glass rounded-2xl p-3 text-center">
+                    <p class="text-2xl font-black text-emerald-400">15%</p>
+                    <p class="text-[10px] text-stone-400">olive oil yield</p>
+                </div>
+                <div class="glass rounded-2xl p-3 text-center">
+                    <p class="text-2xl font-black text-indigo-300">933</p>
+                    <p class="text-[10px] text-stone-400">wine bottles / ton</p>
+                </div>
+                <div class="glass rounded-2xl p-3 text-center">
+                    <p class="text-2xl font-black text-amber-300">$450</p>
+                    <p class="text-[10px] text-stone-400">DOP premium / ton</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 mb-6">
+                <div class="agent glass rounded-2xl p-4" data-agent="0">
+                    <p class="text-amber-300 text-xs font-black uppercase">Don Salvatore</p>
+                    <p class="text-sm font-bold mt-1">Friendly Guide</p>
+                    <p class="text-xs text-stone-400 mt-2">Listens to the farmer, asks the right helpers, and gives the final go/no-go decision.</p>
+                </div>
+                <div class="agent glass rounded-2xl p-4" data-agent="1">
+                    <p class="text-emerald-300 text-xs font-black uppercase">Matteo</p>
+                    <p class="text-sm font-bold mt-1">Numbers Helper</p>
+                    <p class="text-xs text-stone-400 mt-2">Turns tons into liters/bottles and estimates costs, so earnings are easy to understand.</p>
+                </div>
+                <div class="agent glass rounded-2xl p-4" data-agent="2">
+                    <p class="text-indigo-300 text-xs font-black uppercase">Sofia DOP</p>
+                    <p class="text-sm font-bold mt-1">Quality Helper</p>
+                    <p class="text-xs text-stone-400 mt-2">Checks quality rules and tells you if the harvest can qualify for a better price.</p>
+                </div>
+            </div>
+
+            <button id="btn-start" class="w-full bg-emerald-500 text-stone-950 rounded-2xl py-4 text-sm font-black uppercase tracking-widest">Start 2-Min Judge Demo</button>
+            <button id="btn-audio" class="w-full mt-3 glass rounded-2xl py-3 text-xs font-black uppercase tracking-wider border border-emerald-500/30 text-emerald-300">Audio Narration: On</button>
+            <p id="audio-help" class="text-[10px] text-stone-400 mt-2 leading-relaxed">Voice guide explains each scene step-by-step while the teleprompter advances.</p>
+            <a href="index.html" class="block w-full mt-4 text-center bg-violet-500/20 hover:bg-violet-500/30 border border-violet-400/35 text-violet-200 rounded-2xl py-3 text-xs font-black uppercase tracking-wider transition-colors">← Back to Main App</a>
+        </aside>
+
+        <main class="relative h-full">
+            <div id="teleprompter" class="absolute top-0 left-0 right-0 z-30 bg-black/80 border-b border-emerald-500/30 px-6 py-4">
+                <p id="script-line" class="text-emerald-300 text-sm font-bold text-center">Ready: click Start and follow a simple step-by-step story.</p>
+                <div class="h-1 bg-stone-800 mt-3 rounded-full overflow-hidden max-w-3xl mx-auto">
+                    <div id="progress-bar" class="h-full bg-emerald-400 progress" style="width:0%"></div>
+                </div>
+            </div>
+
+            <div id="story-board" class="absolute inset-0 pt-24 p-8 grid grid-cols-2 gap-5 content-start">
+                <div class="step glass rounded-3xl p-4 visible col-span-2" data-step="0">
+                    <div class="grid grid-cols-[1.2fr_.8fr] gap-4 items-center">
+                        <video id="intro-video" class="w-full rounded-2xl border border-emerald-500/20 shadow-2xl shadow-emerald-950/30" src="media/agrivalue-iq-intro.mp4" muted playsinline controls poster="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80"></video>
+                        <div>
+                            <p class="text-[10px] text-emerald-400 font-black uppercase tracking-widest">Intro Video</p>
+                            <h2 class="text-2xl font-black mt-2">From raw harvest to certified value.</h2>
+                            <p class="text-stone-300 text-sm mt-3">Use this generated video as the README hero or the first 12 seconds of the challenge submission recording.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="step glass rounded-3xl p-6" data-step="1">
+                    <p class="text-[10px] text-emerald-400 font-black uppercase tracking-widest">Problem</p>
+                    <h2 class="text-2xl font-black mt-2">Farmers sell raw. Value leaves the village.</h2>
+                    <p class="text-stone-300 text-sm mt-3">AgriValue compares a basic sale with smarter local options so farmers can keep more value.</p>
+                </div>
+                <div class="step glass rounded-3xl p-6" data-step="2">
+                    <p class="text-[10px] text-amber-400 font-black uppercase tracking-widest">Agent Handoff</p>
+                    <h2 class="text-2xl font-black mt-2">Don Salvatore routes the request.</h2>
+                    <p class="text-stone-300 text-sm mt-3">Matteo models yield and costs. Sofia DOP checks standards. The seal is issued only when both pass.</p>
+                </div>
+                <div class="step glass rounded-3xl p-6" data-step="3">
+                    <p class="text-[10px] text-emerald-400 font-black uppercase tracking-widest">Matteo Math</p>
+                    <h2 class="text-2xl font-black mt-2">Olives: 15T → 2,250L</h2>
+                    <p class="text-stone-300 text-sm mt-3">Pressing: $350/T. Bottling: $1.50/L. Fabric IQ converts harvests into business concepts.</p>
+                </div>
+                <div class="step glass rounded-3xl p-6" data-step="4">
+                    <p class="text-[10px] text-indigo-400 font-black uppercase tracking-widest">Sofia Quality Rule</p>
+                    <h2 class="text-2xl font-black mt-2">Acidity ≤ 0.3% unlocks Olio DOP Sicilia.</h2>
+                    <p class="text-stone-300 text-sm mt-3">Foundry IQ grounds the recommendation and applies the $450/ton premium.</p>
+                </div>
+                <div class="step glass rounded-3xl p-6 col-span-2" data-step="5">
+                    <p class="text-[10px] text-violet-400 font-black uppercase tracking-widest">Copilot Assistant</p>
+                    <h2 class="text-2xl font-black mt-2">The same intelligence becomes a Fair-Trade contract in VS Code.</h2>
+                    <code class="block text-xs text-emerald-300 bg-black/40 rounded-2xl p-4 mt-3">@agrivalue-iq generate_supply_contract crop="Olive Oil" qtyTons=15 isOrganic=true</code>
+                </div>
+            </div>
+
+            <iframe id="app-frame" class="absolute inset-0 w-full h-full border-0 opacity-0 pointer-events-none transition-opacity duration-700" src="index.html"></iframe>
+        </main>
+    </div>
+
+    <script>
+        const SCRIPT = [
+            { at: 0, text: "Welcome! Let us begin: this short video shows how a harvest can become more valuable.", agent: 0, step: 0, action: playIntroVideo },
+            { at: 12, text: "Here is the problem in simple words: farmers work hard, but often earn too little from raw sales.", agent: 0, step: 1 },
+            { at: 22, text: "Don Salvatore is your guide. He asks two helpers to check money and quality.", agent: 0, step: 2 },
+            { at: 34, text: "Matteo handles the numbers. For example, 15 tons of olives can become around 2,250 liters of oil.", agent: 1, step: 3 },
+            { at: 45, text: "Sofia checks quality rules. If acidity is low enough, the product can earn a premium label.", agent: 2, step: 4 },
+            { at: 50, text: "Now we open the live app so you can see the same journey in action.", action: () => goApp("?autoplay=1") },
+            { at: 78, text: "This panel shows what each helper decided, plus the final Golden Seal result.", agent: 0 },
+            { at: 96, text: "With one click, Copilot can turn these results into a fair-trade contract draft.", step: 5, action: showCopilotPrompt },
+            { at: 112, text: "That is the idea: simple guidance, clear numbers, and better decisions for farmers.", agent: 0 },
+        ];
+
+        const TOTAL_SEC = 120;
+        let elapsed = 0;
+        let timer = null;
+        let audioNarration = true;
+
+        document.getElementById("btn-start").onclick = startDemo;
+        document.getElementById("btn-audio").onclick = toggleAudioNarration;
+
+        function startDemo() {
+            elapsed = -1;
+            document.getElementById("btn-start").disabled = true;
+            narrate("Welcome to AgriValue IQ. I will guide you step by step, in simple words, as you watch each scene.");
+            tick();
+            timer = setInterval(tick, 1000);
+        }
+
+        function tick() {
+            elapsed++;
+            document.getElementById("progress-bar").style.width = `${Math.min(100, (elapsed / TOTAL_SEC) * 100)}%`;
+            SCRIPT.filter(s => s.at === elapsed).forEach(runCue);
+            if (elapsed >= TOTAL_SEC) {
+                clearInterval(timer);
+                document.getElementById("script-line").textContent = "Demo complete — stop recording.";
+                stopNarration();
+            }
+        }
+
+        function runCue(cue) {
+            document.getElementById("script-line").textContent = cue.text;
+            narrate(cue.text);
+            if (typeof cue.step === "number") {
+                document.querySelectorAll(".step").forEach(el => el.classList.toggle("visible", Number(el.dataset.step) <= cue.step));
+            }
+            if (typeof cue.agent === "number") {
+                document.querySelectorAll(".agent").forEach(el => el.classList.toggle("active", Number(el.dataset.agent) === cue.agent));
+            }
+            cue.action?.();
+        }
+
+        function goApp(qs) {
+            const frame = document.getElementById("app-frame");
+            frame.src = "index.html" + (qs || "");
+            frame.classList.remove("opacity-0", "pointer-events-none");
+        }
+
+        function playIntroVideo() {
+            const video = document.getElementById("intro-video");
+            video.currentTime = 0;
+            video.play().catch(() => {});
+        }
+
+        function showCopilotPrompt() {
+            const prompt = `@agrivalue-iq generate_supply_contract crop="Olive Oil" qtyTons=15 isOrganic=true buyer="Cooperativa Valle del Belice"\n\nCustomize this Fair-Trade agreement for EU DOP export to the US market.`;
+            navigator.clipboard.writeText(prompt);
+        }
+
+        function toggleAudioNarration() {
+            audioNarration = !audioNarration;
+            const button = document.getElementById("btn-audio");
+            button.textContent = `Audio Narration: ${audioNarration ? "On" : "Off"}`;
+            if (!audioNarration) stopNarration();
+        }
+
+        if (!("speechSynthesis" in window)) {
+            audioNarration = false;
+            document.getElementById("btn-audio").textContent = "Audio Narration: Unsupported";
+            document.getElementById("btn-audio").disabled = true;
+            document.getElementById("audio-help").textContent = "Your browser does not support speech synthesis on this page.";
+        }
+
+        function narrate(text) {
+            if (!audioNarration || !("speechSynthesis" in window)) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1;
+            utterance.pitch = 1;
+            utterance.volume = 1;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function stopNarration() {
+            if (!("speechSynthesis" in window)) return;
+            window.speechSynthesis.cancel();
+        }
+    </script>
+</body>
+</html>

@@ -3,331 +3,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriValue AI - Sicilian Advisor Terminal</title>
+    <title>AgriValue IQ — Sicilian Value-Chain Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .laser-line {
-            background: linear-gradient(180deg, rgba(16,185,129,0) 0%, rgba(16,185,129,1) 50%, rgba(16,185,129,0) 100%);
-            animation: scan 2s infinite ease-in-out;
-        }
-        @keyframes scan {
-            0% { top: 0%; }
-            50% { top: 100%; }
-            100% { top: 0%; }
-        }
-    </style>
+    <script src="config.js"></script>
+    <link rel="stylesheet" href="css/app.css">
 </head>
-<body class="h-full flex flex-col font-sans overflow-hidden antialiased">
+<body class="h-full flex flex-col font-sans overflow-hidden antialiased selection:bg-emerald-500/30">
 
-    <!-- Header -->
-    <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md px-6 py-4 flex items-center justify-between shrink-0">
-        <div class="flex items-center gap-3">
-            <div class="bg-emerald-600 text-slate-950 p-2.5 rounded-xl font-bold flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                <i data-lucide="cpu" class="w-6 h-6 animate-pulse"></i>
+    <!-- Intro / Onboarding overlay -->
+    <div id="intro-overlay" class="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-xl flex items-center justify-center hidden">
+        <div class="max-w-2xl w-full mx-6 text-center">
+            <div id="intro-step-0" class="intro-step">
+                <div class="w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center mb-6 shadow-2xl shadow-emerald-500/30 animate-[float_3s_ease-in-out_infinite]">
+                    <i data-lucide="brain-circuit" class="w-12 h-12 text-slate-950"></i>
+                </div>
+                <h1 class="text-4xl font-black text-white mb-3">Welcome to <span class="shimmer-text">AgriValue IQ</span></h1>
+                <p class="text-slate-400 text-base leading-relaxed max-w-lg mx-auto">Many Sicilian farmers sell raw crops for too little. This app helps them choose better, more profitable routes.</p>
             </div>
-            <div>
-                <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
-                    AgriValue <span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold">SICILIAN AGENT PIPELINE v2.0</span>
-                </h1>
-                <p class="text-xs text-slate-400">Institutional Agricultural Value-Chain Optimization System</p>
+            <div id="intro-step-1" class="intro-step hidden">
+                <i data-lucide="database" class="w-16 h-16 text-emerald-400 mx-auto mb-5"></i>
+                <h2 class="text-3xl font-black text-white mb-3">Fabric IQ</h2>
+                <p class="text-slate-400 max-w-lg mx-auto">We connect each crop to nearby processors, local prices, and transport costs so you can quickly see the best option.</p>
+            </div>
+            <div id="intro-step-2" class="intro-step hidden">
+                <i data-lucide="shield-check" class="w-16 h-16 text-indigo-400 mx-auto mb-5"></i>
+                <h2 class="text-3xl font-black text-white mb-3">Foundry IQ</h2>
+                <p class="text-slate-400 max-w-lg mx-auto">A quality helper checks important rules (like DOP and organic standards) and shows when you can earn premium pricing.</p>
+            </div>
+            <div id="intro-step-3" class="intro-step hidden">
+                <i data-lucide="users" class="w-16 h-16 text-violet-400 mx-auto mb-5"></i>
+                <h2 class="text-3xl font-black text-white mb-3">Work IQ + Copilot</h2>
+                <p class="text-slate-400 max-w-lg mx-auto">Then your team gets updates in Teams, and Copilot can draft a contract for you in just a few clicks.</p>
+            </div>
+
+            <div class="flex items-center justify-center gap-2 mt-8 mb-6">
+                <span class="intro-dot w-2 h-2 rounded-full bg-emerald-500 transition-all" data-dot="0"></span>
+                <span class="intro-dot w-2 h-2 rounded-full bg-slate-700 transition-all" data-dot="1"></span>
+                <span class="intro-dot w-2 h-2 rounded-full bg-slate-700 transition-all" data-dot="2"></span>
+                <span class="intro-dot w-2 h-2 rounded-full bg-slate-700 transition-all" data-dot="3"></span>
+            </div>
+            <div class="flex items-center justify-center gap-3">
+                <button id="intro-skip" class="text-slate-500 hover:text-slate-300 text-xs font-bold uppercase tracking-wider px-4 py-3">Skip</button>
+                <button id="intro-next" class="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-slate-950 font-black px-10 py-3 rounded-xl text-sm uppercase tracking-widest shadow-lg shadow-emerald-600/25 transition-all active:scale-[0.97]">Next</button>
             </div>
         </div>
-        <div class="flex items-center gap-2">
-            <span class="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
-            <span class="text-xs font-semibold text-emerald-400 tracking-wider uppercase font-mono">Agent Connected</span>
+    </div>
+
+    <header class="border-b border-slate-800/80 glass px-6 py-3 flex items-center justify-between shrink-0 z-10">
+        <div class="flex items-center gap-4">
+            <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 text-slate-950 p-2.5 rounded-xl shadow-lg shadow-emerald-500/25">
+                <i data-lucide="brain-circuit" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-black tracking-tight text-white flex items-center gap-2">
+                    AgriValue <span class="text-[9px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 px-2 py-0.5 rounded-full">IQ TERMINAL v3</span>
+                </h1>
+                <p class="text-[11px] text-slate-500">Smart helpers for Sicilian farmers: prices, quality checks, and team updates</p>
+                <div id="boot-pill" class="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-emerald-500/35 bg-emerald-500/15 text-emerald-200 text-[10px] font-mono shadow-lg shadow-emerald-900/30">
+                    <i data-lucide="terminal" class="w-3 h-3"></i>
+                    <span>[boot] AgriValue IQ Terminal v3 ready.</span>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center gap-2 ml-4">
+                <div id="pill-fabric" class="iq-pill offline"><span class="w-1.5 h-1.5 rounded-full bg-current"></span><span class="pill-label">Fabric</span></div>
+                <div id="pill-foundry" class="iq-pill offline"><span class="w-1.5 h-1.5 rounded-full bg-current"></span><span class="pill-label">Foundry</span></div>
+                <div id="pill-work" class="iq-pill offline"><span class="w-1.5 h-1.5 rounded-full bg-current"></span><span class="pill-label">Work IQ</span></div>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 flex-wrap justify-end">
+            <div class="select-shell rounded-xl p-1">
+                <select id="theme-select" class="control-select">
+                    <option value="system">System Theme</option>
+                    <option value="dark">Dark Theme</option>
+                    <option value="light">Light Theme</option>
+                    <option value="warm">Warm Theme</option>
+                </select>
+            </div>
+            <div class="select-shell rounded-xl p-1">
+                <select id="currency-select" class="control-select">
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="CAD">CAD (C$)</option>
+                </select>
+            </div>
+            <button onclick="showIntro(true)" class="text-[10px] text-slate-500 hover:text-emerald-400 uppercase font-bold tracking-wider hidden sm:block">Tour</button>
+            <a href="demo.html" class="text-[10px] text-slate-500 hover:text-emerald-400 uppercase font-bold tracking-wider hidden sm:block">Demo Mode</a>
+            <button id="advisor-toggle" class="flex items-center gap-2 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 px-3 py-2 rounded-xl text-xs font-bold transition-all">
+                <i data-lucide="message-square" class="w-4 h-4"></i> AI Advisor
+            </button>
+            <div class="flex items-center gap-2 pl-2 border-l border-slate-800">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-[10px] font-mono text-emerald-400 uppercase">Online</span>
+            </div>
         </div>
     </header>
 
-    <!-- Grid -->
-    <main class="flex-1 flex overflow-hidden p-6 gap-6">
-        
-        <!-- Left: Inputs & Visual Scanner -->
-        <section class="w-1/3 flex flex-col gap-6 overflow-hidden shrink-0">
-            <!-- Inputs -->
-            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-md flex flex-col">
-                <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                    <i data-lucide="sliders" class="text-emerald-400"></i> Parameters
+    <main class="flex-1 flex overflow-hidden">
+        <!-- Left column -->
+        <section class="w-[340px] xl:w-[380px] flex flex-col gap-4 p-4 overflow-y-auto shrink-0 border-r border-slate-800/50">
+            <div class="glass rounded-2xl p-5">
+                <h2 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="sliders-horizontal" class="text-emerald-400 w-4 h-4"></i> Harvest Parameters
                 </h2>
-                <div class="space-y-4">
+                <div class="space-y-3">
                     <div>
-                        <label class="block text-xs text-slate-400 uppercase tracking-wider font-bold mb-1.5">Asset Class</label>
-                        <select id="crop" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all cursor-pointer">
-                            <option value="Olive Oil">Olive Oil 🌿 (Olio DOP)</option>
-                            <option value="Grapes">Grapes 🍇 (Vino DOC)</option>
-                            <option value="Wheat">Wheat 🌾 (Grano duro)</option>
-                            <option value="Coffee">Coffee ☕</option>
-                            <option value="Milk">Milk 🥛</option>
+                        <label class="block text-[10px] text-slate-500 uppercase font-bold mb-1">Crop</label>
+                        <select id="crop" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/30">
+                            <option value="Olive Oil">Olive Oil — Olio DOP</option>
+                            <option value="Grapes">Grapes — Vino DOC</option>
+                            <option value="Wheat">Wheat — Grano duro</option>
+                            <option value="Coffee">Coffee — Etna Specialty</option>
+                            <option value="Milk">Milk — Madonie Dairy</option>
                         </select>
                     </div>
-
                     <div>
-                        <label class="block text-xs text-slate-400 uppercase tracking-wider font-bold mb-1.5">Quantity (MT)</label>
-                        <input type="number" id="qty" value="10" min="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all">
+                        <label class="block text-[10px] text-slate-500 uppercase font-bold mb-1">Quantity (Metric Tons)</label>
+                        <input type="number" id="qty" value="10" min="1" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-emerald-500/50">
+                        <p class="text-[10px] text-slate-500 mt-1">Enter harvest weight in metric tons (e.g. 15).</p>
                     </div>
-
-                    <label class="flex items-center gap-3 mt-4 cursor-pointer group bg-slate-950/50 p-3 rounded-xl border border-slate-800/40 hover:border-emerald-500/30 transition-colors">
-                        <input type="checkbox" id="organic" class="rounded border-slate-800 bg-slate-950 text-emerald-500 focus:ring-emerald-500 w-5 h-5 cursor-pointer">
-                        <div class="text-left">
-                            <span class="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">DOP / DOC Quality Certified</span>
-                            <p class="text-[10px] text-slate-500">Unlocks Live Foundry Agent Verified Bonus</p>
+                    <label class="flex items-center gap-3 cursor-pointer glass rounded-xl p-3 hover:border-emerald-500/20 transition-colors">
+                        <input type="checkbox" id="organic" class="rounded border-slate-700 bg-slate-950 text-emerald-500 w-4 h-4">
+                        <div>
+                            <span class="text-xs font-bold text-white">DOP / DOC Certified</span>
+                            <p class="text-[10px] text-slate-500">May unlock extra premium price</p>
                         </div>
                     </label>
-
-                    <button class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black py-4 rounded-xl transition-all shadow-lg shadow-emerald-600/10 hover:shadow-emerald-600/20 active:scale-[0.98] uppercase tracking-wider text-sm mt-2" onclick="optimizeChain()">
-                        Query Foundry Agent
+                    <button id="optimize-btn" onclick="optimizeChain()" class="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-slate-950 font-black py-3.5 rounded-xl text-xs uppercase tracking-widest shadow-lg shadow-emerald-600/20 transition-all active:scale-[0.98]">
+                        Run IQ Pipeline
                     </button>
+                    <button onclick="runPortfolioScan()" class="w-full glass hover:border-violet-500/30 text-violet-300 font-bold py-2.5 rounded-xl text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-colors">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI Portfolio Scan — All Crops
+                    </button>
+                    <div id="quality-badge" class="hidden glass rounded-xl px-3 py-2 text-[11px] text-indigo-300 border-indigo-500/20">
+                        <span class="font-bold text-indigo-400">Vision:</span> <span id="quality-multiplier-text">—</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Visual Quality Scanner -->
-            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-md flex-1 flex flex-col justify-between overflow-hidden">
-                <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
-                    <span class="flex items-center gap-2"><i data-lucide="camera" class="text-indigo-400"></i> Visual Quality Scan</span>
-                    <span class="text-[9px] bg-slate-800 px-2 py-0.5 rounded text-indigo-300 font-mono">VISION PORT</span>
+            <div class="glass rounded-2xl p-4">
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <i data-lucide="line-chart" class="w-3.5 h-3.5 text-emerald-400"></i> Price trend (last days + forecast)
                 </h3>
-                
-                <div class="flex-1 my-4 bg-slate-950 rounded-xl border border-slate-800 relative flex items-center justify-center overflow-hidden h-40">
-                    <div id="scanner-laser" class="absolute w-full h-1.5 laser-line z-10" style="display:none;"></div>
-                    <div id="scan-preview" class="text-slate-500 text-xs text-center px-4 space-y-2">
-                        <i data-lucide="image" class="w-10 h-10 mx-auto text-slate-700"></i>
-                        <p>Upload a photo of your olives or grapes to run a cognitive neural analysis.</p>
+                <div class="h-32 relative"><canvas id="trendChart"></canvas></div>
+            </div>
+
+            <div class="glass rounded-2xl p-4 flex-1 min-h-[140px]">
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center justify-between">
+                    <span class="flex items-center gap-2"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400"></i> Processor Network</span>
+                </h3>
+                <div id="processor-grid" class="grid grid-cols-2 gap-2"></div>
+            </div>
+
+            <div class="glass rounded-2xl p-4">
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-2">
+                    <i data-lucide="scan" class="w-3.5 h-3.5 text-indigo-400"></i> Vision Quality Scan
+                </h3>
+                <div class="bg-slate-950/80 rounded-xl border border-slate-800 h-28 relative overflow-hidden flex items-center justify-center mb-2">
+                    <div id="scanner-laser" class="absolute w-full h-1 laser-line z-10" style="display:none"></div>
+                    <div id="scan-preview" class="text-slate-600 text-[10px] text-center px-3">
+                        <i data-lucide="image" class="w-8 h-8 mx-auto mb-1 opacity-40"></i>
+                        Upload crop photo
+                    </div>
+                </div>
+                <input type="file" id="file-uploader" accept="image/*" class="hidden" onchange="runImageScan(event)">
+                <button id="upload-photo-btn" onclick="document.getElementById('file-uploader').click()" class="upload-photo-btn w-full text-[11px] font-bold uppercase rounded-lg py-2 transition-colors tracking-wide">
+                    <i data-lucide="camera" class="w-3.5 h-3.5 mr-1.5"></i> Upload Photo
+                </button>
+            </div>
+        </section>
+
+        <!-- Center: Results -->
+        <section class="flex-1 flex flex-col gap-4 p-4 overflow-hidden min-w-0">
+            <div class="glass rounded-2xl flex-1 overflow-y-auto p-6">
+                <div id="welcome-pane" class="h-full flex flex-col items-center justify-center text-center">
+                    <div class="w-full max-w-3xl h-40 rounded-3xl overflow-hidden mb-6 border border-emerald-500/10 shadow-2xl shadow-emerald-950/20">
+                        <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1400&q=80" alt="Mediterranean fields" class="w-full h-full object-cover opacity-70">
+                    </div>
+                    <div class="w-20 h-20 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-5 animate-[float_3s_ease-in-out_infinite]">
+                        <i data-lucide="sprout" class="w-10 h-10 text-emerald-400"></i>
+                    </div>
+                    <h2 class="text-2xl font-black text-white shimmer-text">Your best route, explained simply</h2>
+                    <p class="text-slate-400 text-sm mt-3 max-w-lg leading-relaxed">
+                        <strong class="text-emerald-400">Step 1:</strong> find local buyers and costs.
+                        <strong class="text-indigo-400">Step 2:</strong> check quality rules.
+                        <strong class="text-violet-400">Step 3:</strong> share the result with your team.
+                    </p>
+                    <div class="grid grid-cols-3 gap-4 mt-8 max-w-md w-full">
+                        <div class="glass rounded-xl p-3 text-center"><i data-lucide="crown" class="w-5 h-5 text-amber-400 mx-auto mb-1"></i><span class="text-[10px] text-slate-400">Don Salvatore</span></div>
+                        <div class="glass rounded-xl p-3 text-center"><i data-lucide="calculator" class="w-5 h-5 text-emerald-400 mx-auto mb-1"></i><span class="text-[10px] text-slate-400">Matteo</span></div>
+                        <div class="glass rounded-xl p-3 text-center"><i data-lucide="shield-check" class="w-5 h-5 text-indigo-400 mx-auto mb-1"></i><span class="text-[10px] text-slate-400">Sofia DOP</span></div>
                     </div>
                 </div>
 
-                <div class="space-y-3">
-                    <input type="file" id="file-uploader" accept="image/*" class="hidden" onchange="runImageScan(event)">
-                    <button onclick="document.getElementById('file-uploader').click()" class="w-full bg-slate-850 hover:bg-slate-800 text-indigo-400 font-bold py-2.5 rounded-xl border border-indigo-500/20 text-xs uppercase flex items-center justify-center gap-2 transition-colors">
-                        <i data-lucide="upload" class="w-4 h-4"></i> Upload Crop Photo
+                <div id="portfolio-pane" style="display:none" class="space-y-5">
+                    <div class="bg-gradient-to-r from-violet-500/10 to-indigo-600/5 border border-violet-500/20 rounded-2xl p-5">
+                        <span class="text-[10px] text-violet-400 uppercase font-bold tracking-widest flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI Portfolio Scan
+                        </span>
+                        <p class="text-sm text-slate-300 leading-relaxed mt-2" id="portfolio-narrative">—</p>
+                    </div>
+                    <div id="portfolio-rankings" class="space-y-2"></div>
+                    <button onclick="backToWelcome()" class="text-[10px] text-slate-500 hover:text-slate-300 font-bold uppercase tracking-wider">← Back</button>
+                </div>
+
+                <div id="results-pane" style="display:none" class="space-y-5">
+                    <div class="bg-gradient-to-r from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 rounded-2xl p-5 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-emerald-400 uppercase font-bold tracking-widest">Optimal Profit Boost</span>
+                            <h3 class="text-4xl font-black text-white mt-1 metric-value" id="added-value-amt">$0</h3>
+                        </div>
+                        <div class="bg-emerald-500 text-slate-950 px-4 py-2 rounded-xl text-[10px] font-black uppercase flex items-center gap-1">
+                            <i data-lucide="trending-up" class="w-4 h-4"></i> Path B
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-5 gap-3 items-center glass rounded-xl p-4">
+                        <div class="text-center p-2 rounded-lg bg-slate-900/50">
+                            <span class="text-[9px] text-slate-500 uppercase">Origin</span>
+                            <div class="text-sm font-bold text-white mt-1" id="node-crop">—</div>
+                        </div>
+                        <div class="text-center">
+                            <i data-lucide="arrow-right" class="text-emerald-400 mx-auto animate-pulse"></i>
+                            <span class="text-[8px] text-emerald-500 font-mono block mt-1">Request</span>
+                        </div>
+                        <div class="text-center p-2 rounded-lg bg-amber-950/20 border border-amber-500/20">
+                            <span class="text-[9px] text-amber-400 uppercase">Guide</span>
+                            <div class="text-sm font-bold text-white mt-1">👑 Don Salvatore</div>
+                        </div>
+                        <div class="text-center">
+                            <i data-lucide="arrow-right" class="text-amber-400 mx-auto animate-pulse"></i>
+                            <span class="text-[8px] text-amber-500 font-mono block mt-1">Delegates</span>
+                        </div>
+                        <div class="text-center p-2 rounded-lg bg-emerald-950/30 border border-emerald-500/20">
+                            <span class="text-[9px] text-emerald-500 uppercase">Destination</span>
+                            <div class="text-sm font-bold text-white mt-1" id="node-destination">—</div>
+                        </div>
+                    </div>
+
+                    <div id="agent-council" class="glass rounded-2xl p-4 border-amber-500/10">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-[10px] text-amber-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                                <i data-lucide="network" class="w-3.5 h-3.5"></i> Team Assistant Panel
+                            </span>
+                            <span id="golden-seal" class="hidden bg-amber-400 text-amber-950 rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-wider">
+                                Golden Certification Seal
+                            </span>
+                        </div>
+                        <div id="agent-handoff-diagram" class="hidden mb-4"></div>
+                        <div id="agent-trace-grid" class="grid grid-cols-1 xl:grid-cols-3 gap-3"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="glass rounded-xl p-4">
+                            <h4 class="text-[10px] text-slate-500 font-bold uppercase mb-3">Path A — Commodity Silo</h4>
+                            <div class="space-y-1.5 text-xs">
+                                <div class="flex justify-between"><span>Gross</span><span class="font-mono" id="raw-gross">$0</span></div>
+                                <div class="flex justify-between text-slate-500"><span>Transport</span><span class="font-mono" id="raw-transport">$0</span></div>
+                                <hr class="border-slate-800 my-2">
+                                <div class="flex justify-between font-bold"><span>Net</span><span class="font-mono" id="raw-net">$0</span></div>
+                            </div>
+                        </div>
+                        <div class="glass rounded-xl p-4 border-emerald-500/15">
+                            <h4 class="text-[10px] text-emerald-400 font-bold uppercase mb-3">Path B — Local Processing</h4>
+                            <div class="space-y-1.5 text-xs">
+                                <div class="flex justify-between"><span>Gross</span><span class="font-mono" id="proc-gross">$0</span></div>
+                                <div class="flex justify-between text-red-400/80"><span>Processing</span><span class="font-mono" id="proc-cost">$0</span></div>
+                                <div class="flex justify-between text-emerald-400"><span>Cert Bonus</span><span class="font-mono" id="proc-bonus">$0</span></div>
+                                <hr class="border-slate-800 my-2">
+                                <div class="flex justify-between font-bold text-emerald-400"><span>Net</span><span class="font-mono text-base" id="proc-net">$0</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="rule-box" class="glass rounded-xl p-4 border-indigo-500/10">
+                        <span class="text-[10px] text-indigo-400 font-bold uppercase flex items-center gap-2 mb-2">
+                            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Easy quality explanation
+                        </span>
+                        <p class="text-xs text-slate-300 leading-relaxed" id="rule-text">—</p>
+                    </div>
+
+                    <div id="ai-insights" class="hidden">
+                        <span class="text-[10px] text-violet-400 font-bold uppercase flex items-center gap-2 mb-3">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI Intelligence Briefing
+                        </span>
+                        <div id="ai-insights-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button onclick="exportContract()" class="glass hover:border-emerald-500/30 text-emerald-400 font-bold py-2.5 rounded-xl text-[10px] uppercase flex items-center justify-center gap-1.5 transition-colors col-span-2 sm:col-span-1">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Export Contract
+                        </button>
+                        <button onclick="copyForCopilot()" class="glass hover:border-indigo-500/30 text-indigo-300 font-bold py-2.5 rounded-xl text-[10px] uppercase flex items-center justify-center gap-1.5 transition-colors col-span-2 sm:col-span-1">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy for Copilot
+                        </button>
+                        <button onclick="notifyTeams()" class="glass hover:border-violet-500/30 text-violet-300 font-bold py-2.5 rounded-xl text-[10px] uppercase flex items-center justify-center gap-1.5 transition-colors col-span-2 sm:col-span-1">
+                            <i data-lucide="send" class="w-3.5 h-3.5"></i> Teams Alert
+                        </button>
+                        <a href="demo.html" class="glass hover:border-slate-600 text-slate-400 font-bold py-2.5 rounded-xl text-[10px] uppercase flex items-center justify-center gap-1.5 transition-colors col-span-2 sm:col-span-1">
+                            <i data-lucide="play" class="w-3.5 h-3.5"></i> Record Demo
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass rounded-2xl h-40 flex flex-col overflow-hidden shrink-0">
+                <div class="px-4 py-2 border-b border-slate-800/80 flex items-center justify-between">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="terminal" class="text-emerald-400 w-3.5 h-3.5"></i> IQ Pipeline Console
+                    </span>
+                </div>
+                <div id="agent-console" class="flex-1 overflow-y-auto p-3 font-mono text-[11px] space-y-1 text-emerald-500/90">
+                    <div class="text-slate-600">System ready. Waiting for pipeline run...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right: AI Advisor -->
+        <aside id="advisor-panel" class="w-80 xl:w-96 border-l border-slate-800/50 flex flex-col glass shrink-0">
+            <div class="p-4 border-b border-slate-800/80">
+                <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i data-lucide="crown" class="text-amber-400 w-4 h-4"></i> Don Salvatore
+                </h2>
+                <p class="text-[10px] text-slate-500 mt-1">Friendly guide — asks Matteo and Sofia to help</p>
+            </div>
+            <div id="advisor-messages" class="flex-1 overflow-y-auto p-4">
+                <div class="chat-bubble-ai text-xs p-3 rounded-xl text-indigo-100">
+                    Ciao, I am <strong>Don Salvatore</strong>. I am your guide. Tell me what you harvested, and I will ask Matteo for the numbers and Sofia for the quality check.
+                </div>
+            </div>
+            <div class="px-4 pb-2" id="advisor-chips">
+                <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-2">Quick Questions</p>
+                <div class="grid grid-cols-1 gap-1.5">
+                    <button type="button" class="advisor-chip agent-query query-don" data-agent="don" data-q="Don Salvatore, please show me the best route for my harvest in simple words.">👑 Don: Best route</button>
+                    <button type="button" class="advisor-chip agent-query query-matteo" data-agent="matteo" data-q="Matteo, show me expected liters or bottles, costs, and final earnings in easy language.">🧮 Matteo: Simple numbers</button>
+                    <button type="button" class="advisor-chip agent-query query-sofia" data-agent="sofia" data-q="Sofia, check if my crop can get quality premium and explain why in plain language.">🛡️ Sofia: Quality check</button>
+                    <button type="button" class="advisor-chip agent-query query-seal" data-agent="seal" data-q="Can we issue the Golden Seal? Tell me yes or no with a short reason.">🏅 Golden Seal?</button>
+                    <button type="button" class="advisor-chip agent-query query-contract" data-agent="contract" data-q="Create a friendly fair-trade contract draft using these results.">📄 Friendly contract</button>
+                </div>
+            </div>
+            <form id="advisor-form" class="p-4 border-t border-slate-800/80">
+                <div class="flex gap-2">
+                    <input id="advisor-input" type="text" placeholder="Ask in your own words (for example: How can I earn more?)" class="flex-1 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-indigo-500/40" autocomplete="off">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2 rounded-xl transition-colors">
+                        <i data-lucide="send" class="w-4 h-4"></i>
                     </button>
                 </div>
-            </div>
-        </section>
-
-        <!-- Right: Visualizer & Live Agent Console -->
-        <section class="flex-1 flex flex-col gap-6 overflow-hidden">
-            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-md flex-1 flex flex-col overflow-y-auto">
-                <div id="welcome-pane" class="flex-1 flex flex-col items-center justify-center text-center p-8">
-                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-full mb-4">
-                        <i data-lucide="sprout" class="w-12 h-12 text-emerald-400/80"></i>
-                    </div>
-                    <h2 class="text-xl font-bold text-white">Live Agent Optimization Pipeline</h2>
-                    <p class="text-slate-400 max-w-md text-sm mt-2">Adjust your parameters and query your live Azure AI Foundry Agent to retrieve grounded, standard-audited trade results.</p>
-                </div>
-
-                <div id="results-pane" style="display:none;" class="space-y-6 animate-fade-in">
-                    <!-- Net Added Value -->
-                    <div class="bg-emerald-500/10 border-2 border-emerald-500/20 rounded-2xl p-5 flex items-center justify-between shadow-lg shadow-emerald-500/5">
-                        <div>
-                            <span class="text-xs text-emerald-400 uppercase tracking-widest font-bold">Optimal Profit Boost (Fabric IQ)</span>
-                            <h3 class="text-3xl font-black text-white mt-1" id="added-value-amt">$0.00</h3>
-                        </div>
-                        <div class="bg-emerald-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase shadow-md shadow-emerald-500/10 flex items-center gap-1">
-                            <i data-lucide="trending-up" class="w-4 h-4"></i> Recommended Route
-                        </div>
-                    </div>
-
-                    <!-- Flow Diagram -->
-                    <div class="grid grid-cols-3 gap-4 items-center justify-center p-4 bg-slate-950/40 rounded-xl border border-slate-800/50">
-                        <div class="text-center bg-slate-900 p-3 rounded-xl border border-slate-800">
-                            <span class="text-xs text-slate-400">Harvest Origin</span>
-                            <div class="font-bold text-white text-sm" id="node-crop">Wheat</div>
-                        </div>
-                        <div class="text-center flex flex-col items-center">
-                            <i data-lucide="arrow-right" class="text-emerald-400 animate-pulse"></i>
-                            <span class="text-[9px] text-emerald-400 font-mono tracking-wider">Foundry Agent RAG Verification</span>
-                        </div>
-                        <div class="text-center bg-emerald-950/30 p-3 rounded-xl border border-emerald-500/30">
-                            <span class="text-xs text-emerald-400">Premium Destination</span>
-                            <div class="font-bold text-white text-sm" id="node-destination">Flour Mill</div>
-                        </div>
-                    </div>
-
-                    <!-- Comparison Grid -->
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="bg-slate-950/40 border border-slate-800/80 p-5 rounded-xl">
-                            <h4 class="text-slate-400 font-bold text-xs uppercase tracking-wider mb-3">🚜 Path A: Direct Commodity Silo</h4>
-                            <div class="space-y-2 text-sm">
-                                <div class="flex justify-between"><span>Gross Revenue:</span><span class="font-mono text-white" id="raw-gross">$0</span></div>
-                                <div class="flex justify-between"><span>Transportation Surcharge:</span><span class="font-mono text-slate-400" id="raw-transport">$0</span></div>
-                                <hr class="border-slate-800 my-2">
-                                <div class="flex justify-between font-bold text-slate-300"><span>Net Profit:</span><span class="font-mono" id="raw-net">$0</span></div>
-                            </div>
-                        </div>
-
-                        <div class="bg-emerald-950/10 border border-emerald-500/20 p-5 rounded-xl">
-                            <h4 class="text-emerald-400 font-bold text-xs uppercase tracking-wider mb-3">🏭 Path B: Local Processing Route</h4>
-                            <div class="space-y-2 text-sm">
-                                <div class="flex justify-between"><span>Gross Value-Added Sale:</span><span class="font-mono text-white" id="proc-gross">$0</span></div>
-                                <div class="flex justify-between"><span>Processing Costs:</span><span class="font-mono text-red-400" id="proc-cost">$0</span></div>
-                                <div class="flex justify-between"><span>Specialty Certification Bonus:</span><span class="font-mono text-emerald-400" id="proc-bonus">$0</span></div>
-                                <hr class="border-slate-850 my-2">
-                                <div class="flex justify-between font-bold text-emerald-400 text-base"><span>Optimized Profit:</span><span class="font-mono" id="proc-net">$0</span></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Grounded audit response -->
-                    <div id="rule-box" class="bg-indigo-500/5 border border-indigo-500/10 p-4 rounded-xl flex items-start gap-3">
-                        <i data-lucide="shield-check" class="text-indigo-400 shrink-0"></i>
-                        <div>
-                            <span class="text-xs text-indigo-400 font-bold uppercase tracking-wider">Live Agent Grounded Response (Foundry Knowledge Base)</span>
-                            <p class="text-xs text-slate-300 mt-1" id="rule-text">Standard rule text...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl h-52 flex flex-col overflow-hidden">
-                <div class="bg-slate-900 px-5 py-3 border-b border-slate-800 flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
-                        <i data-lucide="terminal" class="text-emerald-400 animate-pulse"></i> Cognitive Processing Console (Live Feed)
-                    </span>
-                    <span class="text-[9px] bg-slate-800 border border-slate-700 text-slate-400 px-2 py-0.5 rounded font-mono">Agent Logic Nodes</span>
-                </div>
-                <div class="flex-1 overflow-y-auto p-4 font-mono text-xs space-y-2 text-emerald-500/90" id="agent-console">
-                    <div class="text-slate-500">[00:00:01] System boot. Cognitive pipeline initialized successfully. Ready to analyze.</div>
-                </div>
-            </div>
-        </section>
+            </form>
+        </aside>
     </main>
 
-    <script>
-        let chart = null;
-
-        window.onload = () => {
-            lucide.createIcons();
-            initChart('Olive Oil');
-        };
-
-        async function initChart(cropName) {
-            const response = await fetch(`/api/crop/${encodeURIComponent(cropName)}`);
-            const data = await response.json();
-
-            const ctx = document.getElementById('trendChart').getContext('2d');
-            if (chart) chart.destroy();
-
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Tick 1', 'Tick 2', 'Tick 3', 'Tick 4', 'Tick 5', 'Forecast 1', 'Forecast 2', 'Forecast 3', 'Forecast 4', 'Forecast 5'],
-                    datasets: [{
-                        label: `${cropName} Market Series (USD/MT)`,
-                        data: [...data.history, ...data.forecast],
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.03)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: true,
-                        pointBackgroundColor: '#10b981'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: 'rgba(255, 255, 255, 0.02)' }, ticks: { color: '#94a3b8', font: { size: 9 } } },
-                        y: { grid: { color: 'rgba(255, 255, 255, 0.02)' }, ticks: { color: '#94a3b8', font: { size: 9 } } }
-                    }
-                }
-            });
-        }
-
-        document.getElementById('crop').addEventListener('change', (e) => {
-            initChart(e.target.value);
-            logToConsole(`Fabric IQ: Context shifted. Recalculating trends for ${e.target.value}...`);
-        });
-
-        function logToConsole(text) {
-            const consoleBox = document.getElementById('agent-console');
-            const time = new Date().toLocaleTimeString();
-            const log = document.createElement('div');
-            log.innerHTML = `<span class="text-slate-500">[${time}]</span> ${text}`;
-            consoleBox.appendChild(log);
-            consoleBox.scrollTop = consoleBox.scrollHeight;
-        }
-
-        function runImageScan(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const crop = document.getElementById('crop').value;
-            const laser = document.getElementById('scanner-laser');
-            const preview = document.getElementById('scan-preview');
-
-            preview.innerHTML = `<img src="${URL.createObjectURL(file)}" class="object-cover h-full w-full rounded-xl opacity-60">`;
-            laser.style.display = 'block';
-
-            logToConsole(`Foundry Vision Agent: Activating visual sensor tunnel...`);
-            setTimeout(() => logToConsole(`Foundry Vision Agent: Performing neural classification scanning of the crop cells...`), 600);
-
-            // Trigger Quality API call
-            setTimeout(async () => {
-                const response = await fetch('/api/evaluate-quality', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ crop })
-                });
-                const data = await response.json();
-                
-                laser.style.display = 'none';
-                preview.innerHTML = `
-                  <div class="text-left p-3 text-xs space-y-1">
-                    <p class="font-bold text-emerald-400">🤖 Neural Audit Report:</p>
-                    <p><strong>Grade:</strong> ${data.grade}</p>
-                    <p class="text-slate-400 text-[10px] mt-1">${data.analysis}</p>
-                  </div>
-                `;
-                logToConsole(`Foundry Vision Agent: Scan completed successfully. Classification match: ${data.grade}. Quality Multiplier applied.`);
-            }, 2500);
-        }
-
-        async function optimizeChain() {
-            const crop = document.getElementById('crop').value;
-            const qtyTons = document.getElementById('qty').value;
-            const isOrganic = document.getElementById('organic').checked;
-
-            logToConsole(`Cognitive Agent: Initializing optimization routing for ${qtyTons} tons of ${crop}...`);
-            setTimeout(() => logToConsole(`Fabric IQ: Establishing semantic relationships for processing plant networks...`), 400);
-            setTimeout(() => logToConsole(`Foundry Agent: Executing thread. Posting message parameters to agent queue...`), 900);
-            setTimeout(() => logToConsole(`Foundry Agent: Run initiated. RAG Index searching and polling live state...`), 1400);
-
-            try {
-                const response = await fetch('/api/optimize', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ crop, qtyTons, isOrganic })
-                });
-                const data = await response.json();
-
-                setTimeout(() => {
-                    document.getElementById('welcome-pane').style.display = 'none';
-                    document.getElementById('results-pane').style.display = 'block';
-
-                    document.getElementById('added-value-amt').innerText = `$${data.addedValue.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                    document.getElementById('node-crop').innerText = `${crop} (${qtyTons} MT)`;
-                    document.getElementById('node-destination').innerText = data.processedPath.processor;
-
-                    document.getElementById('raw-gross').innerText = `$${data.rawPath.gross.toLocaleString()}`;
-                    document.getElementById('raw-transport').innerText = `-$${data.rawPath.transport.toLocaleString()}`;
-                    document.getElementById('raw-net').innerText = `$${data.rawPath.net.toLocaleString()}`;
-
-                    document.getElementById('proc-gross').innerText = `$${data.processedPath.gross.toLocaleString()}`;
-                    document.getElementById('proc-cost').innerText = `-$${data.processedPath.processingCost.toLocaleString()}`;
-                    document.getElementById('proc-bonus').innerText = `+$${data.processedPath.organicBonus.toLocaleString()}`;
-                    document.getElementById('proc-net').innerText = `$${data.processedPath.net.toLocaleString()}`;
-
-                    document.getElementById('rule-text').innerText = data.processedPath.foundryIQRule;
-
-                    logToConsole(`🎉 Pipeline Optimization Completed! Grounded Agent Response Processed.`);
-                }, 2000);
-
-            } catch (err) {
-                logToConsole(`❌ Error: Connection to Foundry Agent endpoint failed.`);
-            }
-        }
-    </script>
+    <script type="module" src="mock-api.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>

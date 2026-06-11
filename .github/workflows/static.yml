@@ -32,6 +32,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Sync static Fabric IQ data
+        run: node scripts/sync-static-data.js
+
+      - name: Inject Azure API URL for GitHub Pages
+        run: node scripts/inject-config.js
+        env:
+          AZURE_API_URL: ${{ secrets.AZURE_API_URL }}
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
