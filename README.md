@@ -123,7 +123,7 @@ infra/                  # Bicep + Fabric SQL schema
 2. Open VS Code with Copilot MCP (`.vscode/mcp.json`)
 3. Record screen — script in [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
 
-*Video must be recorded by you — the demo page provides teleprompter timing only.*
+
 
 ## Security
 
