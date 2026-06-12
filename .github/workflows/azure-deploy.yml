@@ -2,7 +2,7 @@ name: Deploy backend to Azure App Service
 
 on:
   push:
-    branches: [main]
+    branches: [PROD]
     paths:
       - 'server.js'
       - 'lib/**'

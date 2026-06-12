@@ -13,8 +13,8 @@
 <body class="h-full flex flex-col font-sans overflow-hidden antialiased selection:bg-emerald-500/30">
 
     <!-- Intro / Onboarding overlay -->
-    <div id="intro-overlay" class="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-xl flex items-center justify-center hidden">
-        <div class="max-w-2xl w-full mx-6 text-center">
+    <div id="intro-overlay" class="intro-overlay fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-xl flex hidden">
+        <div class="intro-panel max-w-2xl w-full mx-auto text-center">
             <div id="intro-step-0" class="intro-step">
                 <div class="w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center mb-6 shadow-2xl shadow-emerald-500/30 animate-[float_3s_ease-in-out_infinite]">
                     <i data-lucide="brain-circuit" class="w-12 h-12 text-slate-950"></i>
@@ -38,7 +38,7 @@
                 <p class="text-slate-400 max-w-lg mx-auto">Then Teams gets the message, Copilot drafts the contract, and Don Salvatore can relax for one espresso.</p>
             </div>
 
-            <div class="flex items-center justify-center gap-2 mt-8 mb-6">
+            <div class="intro-dots flex items-center justify-center gap-2 mt-8 mb-6">
                 <span class="intro-dot w-2 h-2 rounded-full bg-emerald-500 transition-all" data-dot="0"></span>
                 <span class="intro-dot w-2 h-2 rounded-full bg-slate-700 transition-all" data-dot="1"></span>
                 <span class="intro-dot w-2 h-2 rounded-full bg-slate-700 transition-all" data-dot="2"></span>
@@ -66,13 +66,13 @@
                     <span>Don Salvatore is ready. Andiamo.</span>
                 </div>
             </div>
-            <div class="hidden md:flex items-center gap-2 ml-4">
+            <div class="iq-pills-row hidden md:flex items-center gap-2 ml-4">
                 <div id="pill-fabric" class="iq-pill offline"><span class="w-1.5 h-1.5 rounded-full bg-current"></span><span class="pill-label">Fabric</span></div>
                 <div id="pill-foundry" class="iq-pill offline"><span class="w-1.5 h-1.5 rounded-full bg-current"></span><span class="pill-label">Foundry</span></div>
                 <div id="pill-work" class="iq-pill offline"><span class="w-1.5 h-1.5 rounded-full bg-current"></span><span class="pill-label">Work IQ</span></div>
             </div>
         </div>
-        <div class="flex items-center gap-3 flex-wrap justify-end">
+        <div class="header-actions flex items-center gap-2 sm:gap-3 flex-wrap justify-end w-full sm:w-auto">
             <div class="select-shell rounded-xl p-1">
                 <select id="theme-select" class="control-select">
                     <option value="system">System Theme</option>
@@ -89,8 +89,8 @@
                     <option value="CAD">CAD (C$)</option>
                 </select>
             </div>
-            <button onclick="showIntro(true)" class="text-[10px] text-slate-500 hover:text-emerald-400 uppercase font-bold tracking-wider hidden sm:block">Tour</button>
-            <a href="demo.html" class="text-[10px] text-slate-500 hover:text-emerald-400 uppercase font-bold tracking-wider hidden sm:block">Demo Mode</a>
+            <button onclick="showIntro(true)" class="header-link text-[10px] text-slate-500 hover:text-emerald-400 uppercase font-bold tracking-wider px-2 py-1">Tour</button>
+            <a href="demo.html" class="header-link text-[10px] text-emerald-400 hover:text-emerald-300 uppercase font-bold tracking-wider px-2 py-1 border border-emerald-500/30 rounded-lg bg-emerald-500/10">Judge Demo</a>
             <button id="advisor-toggle" class="flex items-center gap-2 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 px-3 py-2 rounded-xl text-xs font-bold transition-all">
                 <i data-lucide="message-square" class="w-4 h-4"></i> AI Advisor
             </button>
@@ -100,6 +100,12 @@
             </div>
         </div>
     </header>
+
+    <div class="iq-pills-mobile md:hidden flex items-center justify-center gap-2 px-4 py-2 border-b border-slate-800/60 glass shrink-0">
+        <div id="pill-fabric-mobile" class="iq-pill offline"><span class="w-1.5 h-1.5 rounded-full bg-current"></span><span class="pill-label">Fabric</span></div>
+        <div id="pill-foundry-mobile" class="iq-pill offline"><span class="w-1.5 h-1.5 rounded-full bg-current"></span><span class="pill-label">Foundry</span></div>
+        <div id="pill-work-mobile" class="iq-pill offline"><span class="w-1.5 h-1.5 rounded-full bg-current"></span><span class="pill-label">Work</span></div>
+    </div>
 
     <main class="flex-1 flex overflow-hidden">
         <!-- Left column -->

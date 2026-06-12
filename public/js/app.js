@@ -130,6 +130,11 @@ function setPill(id, live, label) {
   if (!el) return;
   el.className = `iq-pill ${live ? "live" : "offline"}`;
   el.querySelector(".pill-label").textContent = label;
+  const mobile = document.getElementById(`${id}-mobile`);
+  if (mobile) {
+    mobile.className = el.className;
+    mobile.querySelector(".pill-label").textContent = label.replace("Work IQ", "Work");
+  }
 }
 
 async function loadProcessorNetwork() {

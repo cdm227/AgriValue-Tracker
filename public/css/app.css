@@ -490,6 +490,30 @@ body[data-theme="light"] .upload-photo-btn:hover {
 .query-seal { color: #fcd34d; border-color: rgba(252, 211, 77, 0.24); background: rgba(252, 211, 77, 0.08); }
 .query-contract { color: #c4b5fd; border-color: rgba(196, 181, 253, 0.22); background: rgba(196, 181, 253, 0.07); }
 
+.intro-overlay {
+  align-items: flex-start;
+  justify-content: center;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.intro-panel {
+  margin: auto 0;
+  padding: 8px 0 24px;
+}
+
+.intro-dots .intro-dot[data-active="true"],
+.intro-dot.bg-emerald-500 {
+  transform: scale(1.25);
+}
+
+@media (min-width: 640px) {
+  .intro-overlay {
+    align-items: center;
+  }
+}
+
 .intro-step {
   animation: fadeUp 0.5s ease forwards;
 }
@@ -598,6 +622,21 @@ body[data-theme="light"] .upload-photo-btn:hover {
     overflow: auto !important;
   }
 
+  body.h-full.overflow-hidden {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .iq-pills-mobile {
+    position: sticky;
+    top: 0;
+    z-index: 9;
+  }
+
+  .header-actions {
+    justify-content: center !important;
+  }
+
   .app-header {
     position: sticky;
     top: 0;
@@ -660,7 +699,16 @@ body[data-theme="light"] .upload-photo-btn:hover {
 
   #welcome-pane {
     min-height: 420px;
-    padding: 24px 0;
+    padding: 24px 16px;
+    width: 100%;
+    text-align: center;
+  }
+
+  #welcome-pane .grid.grid-cols-3 {
+    grid-template-columns: 1fr !important;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   #welcome-pane .grid,
