@@ -187,17 +187,29 @@
         <section class="flex-1 flex flex-col gap-4 p-4 overflow-hidden min-w-0">
             <div class="glass rounded-2xl flex-1 overflow-y-auto p-6">
                 <div id="welcome-pane" class="h-full flex flex-col items-center justify-center text-center">
-                    <div class="w-full max-w-3xl h-40 rounded-3xl overflow-hidden mb-6 border border-emerald-500/10 shadow-2xl shadow-emerald-950/20">
-                        <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1400&q=80" alt="Mediterranean fields" class="w-full h-full object-cover opacity-70">
+                    <div class="welcome-hero w-full max-w-3xl mb-6">
+                        <div class="welcome-hero-media rounded-3xl overflow-hidden border border-emerald-500/10 shadow-2xl shadow-emerald-950/20">
+                            <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1400&q=80" alt="Mediterranean fields at sunset" class="welcome-hero-img">
+                            <div class="welcome-hero-scrim" aria-hidden="true"></div>
+                            <div class="welcome-hero-caption">
+                                <p class="welcome-hero-eyebrow">AgriValue IQ · Sicily</p>
+                                <h2 class="welcome-hero-title shimmer-text">Your best route, explained simply</h2>
+                                <button type="button" id="welcome-hero-dettagli" class="welcome-hero-btn-dettagli" aria-expanded="false" aria-controls="welcome-hero-details">Dettagli</button>
+                            </div>
+                        </div>
+                        <div id="welcome-hero-details" class="welcome-hero-details hidden" role="region" aria-label="Harvest workflow details">
+                            <p class="text-slate-300 text-sm leading-relaxed text-left">
+                                <strong class="text-emerald-300">Step 1:</strong> find local buyers and costs.
+                                <strong class="text-indigo-300">Step 2:</strong> Vision scan grades your crop and boosts Path B.
+                                <strong class="text-violet-300">Step 3:</strong> agents remember every trade in history.
+                            </p>
+                        </div>
                     </div>
                     <div class="w-20 h-20 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-5 animate-[float_3s_ease-in-out_infinite]">
                         <i data-lucide="sprout" class="w-10 h-10 text-emerald-400"></i>
                     </div>
-                    <h2 class="text-2xl font-black text-white shimmer-text">Your best route, explained simply</h2>
-                    <p class="text-slate-400 text-sm mt-3 max-w-lg leading-relaxed">
-                        <strong class="text-emerald-400">Step 1:</strong> find local buyers and costs.
-                        <strong class="text-indigo-400">Step 2:</strong> Vision scan grades your crop and boosts Path B.
-                        <strong class="text-violet-400">Step 3:</strong> agents remember every trade in history.
+                    <p class="text-slate-400 text-sm mt-3 max-w-lg leading-relaxed welcome-hero-summary">
+                        Run the IQ pipeline on the left — Matteo compares Path A vs Path B, Sofia checks DOP, then export the contract.
                     </p>
                     <div class="grid grid-cols-3 gap-4 mt-8 max-w-md w-full">
                         <div class="glass rounded-xl p-3 text-center"><i data-lucide="crown" class="w-5 h-5 text-amber-400 mx-auto mb-1"></i><span class="text-[10px] text-slate-400">Don Salvatore</span></div>

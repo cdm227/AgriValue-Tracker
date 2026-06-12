@@ -11,9 +11,17 @@
     <script src="config.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
+        html {
+            height: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
         body {
             font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
             background: #0c0a09;
+            min-height: 100vh;
+            min-height: 100dvh;
+            height: 100%;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
@@ -25,7 +33,100 @@
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
         }
-        .demo-shell { grid-template-rows: minmax(0, 1fr); }
+        .demo-shell {
+            grid-template-rows: minmax(0, 1fr);
+            min-height: 100vh;
+            min-height: 100dvh;
+            height: 100vh;
+            height: 100dvh;
+        }
+        .demo-hero {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+            border-radius: 20px;
+            min-height: clamp(220px, 38vh, 320px);
+        }
+        .demo-hero-media {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            transform: scale(1.02);
+        }
+        .demo-hero-scrim {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.28);
+            pointer-events: none;
+        }
+        .demo-hero-content {
+            position: relative;
+            z-index: 1;
+            padding: clamp(20px, 4vw, 32px);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-end;
+            min-height: inherit;
+            gap: 10px;
+        }
+        .demo-hero-eyebrow {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: #a7f3d0;
+        }
+        .demo-hero-title {
+            font-size: clamp(1.35rem, 4.5vw, 1.85rem);
+            font-weight: 800;
+            line-height: 1.15;
+            color: #ffffff;
+            text-shadow: 0 2px 16px rgba(0,0,0,.45);
+            max-width: 28ch;
+        }
+        .demo-hero-lead {
+            font-size: clamp(.8rem, 2.8vw, .9rem);
+            line-height: 1.5;
+            color: #f5f5f4;
+            max-width: 52ch;
+            text-shadow: 0 1px 10px rgba(0,0,0,.4);
+        }
+        /* APCA/WCAG ≥ 5.48:1 — #0c0a09 on #f8fafc ≈ 19:1 */
+        .demo-hero-btn-dettagli {
+            margin-top: 6px;
+            border: 2px solid #f8fafc;
+            border-radius: 12px;
+            padding: 11px 18px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: #0c0a09;
+            background: #f8fafc;
+            box-shadow: 0 8px 24px rgba(0,0,0,.35);
+            transition: background .2s ease, color .2s ease, transform .15s ease;
+        }
+        .demo-hero-btn-dettagli:hover {
+            background: #ffffff;
+            color: #052e16;
+            transform: translateY(-1px);
+        }
+        .demo-hero-btn-dettagli:focus-visible {
+            outline: 3px solid #6ee7b7;
+            outline-offset: 2px;
+        }
+        .demo-hero-details {
+            margin-top: 14px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(52,211,153,.25);
+            background: rgba(0,0,0,.35);
+        }
+        .demo-hero-details.is-open { display: block !important; }
+        .hero-step { padding: 0 !important; overflow: hidden; }
+        .hero-step .demo-hero-details { margin: 0; border-radius: 0; border: none; border-top: 1px solid rgba(52,211,153,.2); }
         .step { opacity: .45; transform: scale(.98); transition: all .45s ease; }
         .step.visible { opacity: 1; transform: scale(1); border-color: rgba(16,185,129,.55); }
         .step.current { box-shadow: 0 0 0 1px rgba(52,211,153,.7), 0 18px 55px rgba(16,185,129,.16); background: linear-gradient(135deg, rgba(16,185,129,.18), rgba(28,25,23,.78)); }
@@ -182,14 +283,15 @@
             font-size: 12px;
             font-weight: 700;
             letter-spacing: .03em;
-            color: #6ee7b7;
-            background: rgba(16,185,129,.08);
-            border: 1px solid rgba(52,211,153,.28);
+            color: #f8fafc;
+            background: rgba(5, 46, 22, 0.92);
+            border: 1px solid rgba(167, 243, 208, 0.45);
             transition: background .2s ease, border-color .2s ease, transform .15s ease;
         }
         .demo-btn-secondary:hover:not(:disabled) {
-            background: rgba(16,185,129,.14);
-            border-color: rgba(52,211,153,.5);
+            background: rgba(6, 78, 59, 0.95);
+            border-color: rgba(167, 243, 208, 0.65);
+            color: #ffffff;
             transform: translateY(-1px);
         }
         .demo-btn-ghost {
@@ -288,17 +390,32 @@
         }
         .aside-compact { display: block; }
         @media (max-width: 1024px) {
-            body.h-full.overflow-hidden { height: auto; min-height: 100%; overflow: auto; }
+            html, body {
+                min-height: 100vh;
+                min-height: 100dvh;
+                height: 100%;
+            }
+            body.h-full.overflow-hidden {
+                min-height: 100vh;
+                min-height: 100dvh;
+                height: 100%;
+                overflow: hidden;
+            }
             .demo-shell {
                 display: flex;
                 flex-direction: column;
                 grid-template-columns: 1fr !important;
                 min-height: 100vh;
-                height: auto;
+                min-height: 100dvh;
+                height: 100vh;
+                height: 100dvh;
             }
             .demo-mobile-bar { display: flex; }
-            main { order: 1; height: auto; min-height: 0; flex: 1; }
-            aside { order: 2; height: auto !important; }
+            main { order: 1; min-height: 0; flex: 1; height: auto; overflow: hidden; }
+            aside { order: 2; height: auto !important; max-height: 42vh; overflow-y: auto; flex-shrink: 0; }
+            .demo-hero { min-height: clamp(200px, 32vh, 280px); }
+            .demo-hero-content { align-items: stretch; }
+            .demo-hero-btn-dettagli { width: 100%; text-align: center; }
             aside .metric-explainer,
             aside .grid.grid-cols-3,
             aside .space-y-3 { display: none; }
@@ -431,14 +548,19 @@
 
             <div id="story-scroll">
             <div id="story-board">
-                <div class="step glass rounded-3xl p-4 visible col-span-2" data-step="0">
-                    <div class="grid grid-cols-[1.2fr_.8fr] gap-4 items-center">
-                        <video id="intro-video" class="w-full rounded-2xl border border-emerald-500/20 shadow-2xl shadow-emerald-950/30" src="media/agrivalue-iq-intro.mp4" muted playsinline controls poster="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80"></video>
-                        <div>
-                            <p class="text-[10px] text-emerald-400 font-black uppercase tracking-widest">Intro Video</p>
-                            <h2 class="text-2xl font-black mt-2">From raw harvest to certified value.</h2>
-                            <p class="text-stone-300 text-sm mt-3">A friendly AI story that shows how farmers can turn raw harvest into higher-value products — Don Salvatore listens, Matteo finds the money, Sofia checks the papers, and Copilot packages the deal.</p>
+                <div class="step glass rounded-3xl visible col-span-2 hero-step" data-step="0">
+                    <div class="demo-hero">
+                        <div class="demo-hero-media" style="background-image:url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80')" role="img" aria-label="Sicilian olive fields at sunset"></div>
+                        <div class="demo-hero-scrim" aria-hidden="true"></div>
+                        <div class="demo-hero-content">
+                            <p class="demo-hero-eyebrow">Battle #1 · Intro</p>
+                            <h2 class="demo-hero-title">From raw harvest to certified value.</h2>
+                            <p class="demo-hero-lead">Don Salvatore, Matteo, and Sofia turn a silo sale into local DOP value — then Copilot drafts the contract.</p>
+                            <button type="button" id="btn-hero-dettagli" class="demo-hero-btn-dettagli" aria-expanded="false" aria-controls="hero-details">Dettagli</button>
                         </div>
+                    </div>
+                    <div id="hero-details" class="demo-hero-details hidden">
+                        <video id="intro-video" class="w-full block" src="media/agrivalue-iq-intro.mp4" muted playsinline controls poster="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80" title="AgriValue IQ intro video"></video>
                     </div>
                 </div>
                 <div class="step glass rounded-3xl p-6" data-step="1">
@@ -530,6 +652,7 @@
 
         document.getElementById("btn-start").onclick = startDemo;
         document.getElementById("btn-start-mobile").onclick = () => document.getElementById("btn-start").click();
+        document.getElementById("btn-hero-dettagli").onclick = toggleHeroDetails;
         document.getElementById("btn-audio").onclick = toggleAudioNarration;
         document.getElementById("btn-replay").onclick = () => { hideFinale(); startDemo(); };
         document.getElementById("btn-close-finale").onclick = hideFinale;
@@ -707,15 +830,35 @@
             status.classList.add("visible");
         }
 
+        function toggleHeroDetails() {
+            const panel = document.getElementById("hero-details");
+            const btn = document.getElementById("btn-hero-dettagli");
+            const open = !panel.classList.contains("is-open");
+            panel.classList.toggle("hidden", !open);
+            panel.classList.toggle("is-open", open);
+            btn.setAttribute("aria-expanded", open ? "true" : "false");
+            btn.textContent = open ? "Nascondi video" : "Dettagli";
+            if (open) {
+                panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                playIntroVideo();
+            }
+        }
+
         function playIntroVideo() {
             const video = document.getElementById("intro-video");
+            const panel = document.getElementById("hero-details");
+            const btn = document.getElementById("btn-hero-dettagli");
             if (!video) return;
+            if (panel && !panel.classList.contains("is-open")) {
+                panel.classList.remove("hidden");
+                panel.classList.add("is-open");
+                btn?.setAttribute("aria-expanded", "true");
+                if (btn) btn.textContent = "Nascondi video";
+            }
             video.muted = true;
             video.currentTime = 0;
             video.play().catch(() => {});
         }
-
-        playIntroVideo();
 
         function showCopilotPrompt() {
             exitLiveApp();

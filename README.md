@@ -4,7 +4,13 @@
 
 Sicilian agricultural value-chain optimizer powered by **Fabric IQ**, **Foundry IQ**, and **Work IQ** — with GitHub Copilot MCP contract generation.
 
-## Intro Video
+## Submission Demo Video (Agents League)
+
+**2-min judge walkthrough:** [youtu.be/o8KqG8foLfM](https://youtu.be/o8KqG8foLfM)
+
+Recorded from the live teleprompter at [demo.html](https://cdm227.github.io/AgriValue-Tracker/demo.html) (Fabric / Foundry / Vision / agent memory / Work IQ story).
+
+## Intro Video (README)
 
 <video src="public/media/agrivalue-iq-intro.mp4" controls width="100%" poster="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80"></video>
 
@@ -92,12 +98,12 @@ npm run agent:action -- contract --crop "Olive Oil" --qty 15 --buyer "Cooperativ
 
 ## Challenge Requirements
 
-| Requirement | Documentation |
-|-------------|---------------|
-| GitHub Copilot usage | [docs/COPILOT.md](docs/COPILOT.md) |
-| Microsoft IQ (×3) | [docs/MICROSOFT_IQ.md](docs/MICROSOFT_IQ.md) |
-| Azure deployment | [docs/AZURE_DEPLOY.md](docs/AZURE_DEPLOY.md) |
-| 2-min demo video script | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
+| Requirement | Status | Documentation |
+|-------------|--------|---------------|
+| GitHub Copilot + MCP | Done | [docs/COPILOT.md](docs/COPILOT.md) |
+| Microsoft IQ (×3) | Demo + docs | [docs/MICROSOFT_IQ.md](docs/MICROSOFT_IQ.md) |
+| Azure deployment | Workflow ready | [docs/AZURE_DEPLOY.md](docs/AZURE_DEPLOY.md) |
+| Submission demo video | [YouTube](https://youtu.be/o8KqG8foLfM) | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
 
 ## UI Features (v3)
 
@@ -123,16 +129,16 @@ infra/                  # Bicep + Fabric SQL schema
 .github/workflows/      # Azure + GitHub Pages deploy
 ```
 
-## Record Your 2-Min Submission Video
+## Agents League Submission
 
-Full step-by-step: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
+| Item | Link |
+|------|------|
+| **Demo video** | https://youtu.be/o8KqG8foLfM |
+| **Live app** | https://cdm227.github.io/AgriValue-Tracker/demo.html |
+| **Register** (required for badge/prizes) | https://aka.ms/agentsleague/register |
+| **Submit issue** (official) | [microsoft/agentsleague — Project Submission](https://github.com/microsoft/agentsleague/issues/new?template=project.yml) |
 
-### Quick checklist
-
-1. **Demo page:** [demo.html](https://cdm227.github.io/AgriValue-Tracker/demo.html) → **Start 2-Min Judge Demo** (teleprompter + narration)
-2. **Copilot MCP:** Open this repo in VS Code → Copilot Chat → `@agrivalue-iq generate_supply_contract ...` (see script)
-3. **Record:** OBS, Win+G (Xbox Game Bar), or Loom — capture demo page + VS Code split or cut
-4. **Upload:** YouTube (unlisted) or Loom → paste link at [aka.ms/agentsleague/aisf](https://aka.ms/agentsleague/aisf)
+Recording notes: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
 
 ### Fix default branch & auto-deploy (one-time)
 

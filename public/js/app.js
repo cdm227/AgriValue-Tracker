@@ -23,6 +23,7 @@ export function initApp() {
   setupCropListener();
   setupAdvisor();
   setupIntro();
+  setupWelcomeHero();
   renderTradeHistory(document.getElementById("trade-history-list"));
   if (window.lucide) lucide.createIcons();
 }
@@ -74,6 +75,20 @@ function setupIntro() {
   document.getElementById("intro-next")?.addEventListener("click", nextIntroStep);
   document.getElementById("intro-skip")?.addEventListener("click", () => showIntro(false));
   if (!localStorage.getItem("agrivalue-intro-seen")) showIntro(true);
+}
+
+function setupWelcomeHero() {
+  const btn = document.getElementById("welcome-hero-dettagli");
+  const panel = document.getElementById("welcome-hero-details");
+  if (!btn || !panel) return;
+  btn.addEventListener("click", () => {
+    const open = !panel.classList.contains("is-open");
+    panel.classList.toggle("hidden", !open);
+    panel.classList.toggle("is-open", open);
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+    btn.textContent = open ? "Nascondi" : "Dettagli";
+    if (open) panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
 }
 
 window.showIntro = function (visible) {
