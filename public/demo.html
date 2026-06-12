@@ -4,25 +4,286 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgriValue — Judge Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="config.js"></script>
     <style>
-        body { font-family: Inter, system-ui, sans-serif; background: #0c0a09; }
-        .glass { background: rgba(28,25,23,.72); border: 1px solid rgba(245,158,11,.16); backdrop-filter: blur(16px); }
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+            background: #0c0a09;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        button, a, select, [role="button"] { cursor: pointer; }
+        button:disabled { cursor: not-allowed; opacity: .55; }
+        .glass {
+            background: rgba(28,25,23,.72);
+            border: 1px solid rgba(245,158,11,.16);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .demo-shell { grid-template-rows: minmax(0, 1fr); }
         .step { opacity: .45; transform: scale(.98); transition: all .45s ease; }
         .step.visible { opacity: 1; transform: scale(1); border-color: rgba(16,185,129,.55); }
+        .step.current { box-shadow: 0 0 0 1px rgba(52,211,153,.7), 0 18px 55px rgba(16,185,129,.16); background: linear-gradient(135deg, rgba(16,185,129,.18), rgba(28,25,23,.78)); }
         .agent.active { box-shadow: 0 0 0 1px rgba(16,185,129,.65), 0 16px 40px rgba(16,185,129,.12); transform: translateY(-3px); }
-        .progress { transition: width .3s linear; }
+        .progress {
+            transition: width .3s linear;
+            background: linear-gradient(90deg, #34d399, #10b981, #6ee7b7);
+            box-shadow: 0 0 12px rgba(52,211,153,.5);
+        }
+        #teleprompter {
+            background: linear-gradient(180deg, rgba(5,5,4,.95) 0%, rgba(12,10,9,.88) 100%);
+            border-bottom: 1px solid rgba(52,211,153,.15);
+        }
+        .demo-mission {
+            max-width: 52rem;
+            margin: 10px auto 0;
+            padding: 10px 14px;
+            border-radius: 14px;
+            background: rgba(16,185,129,.08);
+            border: 1px solid rgba(52,211,153,.22);
+            text-align: center;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #d6d3d1;
+        }
+        .demo-mission strong { color: #6ee7b7; font-weight: 700; }
+        .demo-action-banner { display: none; margin: 8px auto 0; width: min(920px, 100%); padding: 7px 14px; border-radius: 14px; background: linear-gradient(90deg, rgba(16,185,129,.95), rgba(245,158,11,.9)); color: #1c1917; font-weight: 950; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; text-align: center; }
+        .demo-action-banner.visible { display: block; }
+        .demo-action-banner.handoff { background: linear-gradient(90deg, rgba(99,102,241,.85), rgba(245,158,11,.85)); animation: handoffPulse 1.2s ease-in-out infinite; }
+        @keyframes handoffPulse { 50% { opacity: .88; transform: scale(1.01); } }
+        .flow-map { width: min(980px, calc(100% - 48px)); margin: 14px auto 0; flex-shrink: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+        .flow-node { position: relative; min-height: 74px; padding: 12px; border-radius: 20px; background: rgba(12,10,9,.78); border: 1px solid rgba(120,113,108,.35); transition: all .35s ease; overflow: hidden; }
+        .flow-node::after { content: ""; position: absolute; top: 50%; left: calc(100% + 1px); width: 10px; height: 2px; background: linear-gradient(90deg, rgba(16,185,129,.8), transparent); box-shadow: 0 0 16px rgba(16,185,129,.5); }
+        .flow-node:last-child::after { display: none; }
+        .flow-node.done { border-color: rgba(52,211,153,.35); background: rgba(16,185,129,.08); opacity: .72; }
+        .flow-node.done .wire-dot { opacity: .85; transform: scale(1); background: #10b981; }
+        .flow-node.current { border-color: rgba(52,211,153,.9); background: linear-gradient(135deg, rgba(16,185,129,.28), rgba(99,102,241,.12)); transform: translateY(-3px); box-shadow: 0 0 0 1px rgba(52,211,153,.45), 0 12px 32px rgba(16,185,129,.18); animation: flowPulse 1.8s ease-in-out infinite; }
+        .flow-node.current .wire-dot { opacity: 1; transform: scale(1.15); }
+        @keyframes flowPulse { 50% { box-shadow: 0 0 0 1px rgba(52,211,153,.65), 0 16px 40px rgba(16,185,129,.28); } }
+        #flow-status { width: min(980px, calc(100% - 48px)); margin: 8px auto 0; text-align: center; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #6ee7b7; }
+        .wire-dot { display: inline-block; width: 8px; height: 8px; border-radius: 999px; background: #34d399; opacity: .35; transform: scale(.85); box-shadow: 0 0 18px rgba(52,211,153,.7); transition: all .35s ease; }
+        .metric-explainer { display: grid; gap: 8px; margin-top: -12px; margin-bottom: 20px; }
+        .metric-explainer div { border-left: 2px solid rgba(52,211,153,.45); padding-left: 10px; color: #d6d3d1; font-size: 11px; line-height: 1.35; }
+        .live-app-status { position: absolute; top: 58px; right: 16px; left: auto; bottom: auto; z-index: 56; width: min(300px, calc(100% - 32px)); padding: 10px 14px; border-radius: 16px; background: rgba(12,10,9,.96); border: 1px solid rgba(52,211,153,.55); box-shadow: 0 12px 40px rgba(0,0,0,.45); opacity: 0; transform: translateY(-8px); transition: opacity .35s ease, transform .35s ease; pointer-events: none; }
+        .live-app-status.visible { opacity: 1; transform: translateY(0); }
+        main.live-running .live-app-status { top: 62px; }
+        .live-dot { width: 8px; height: 8px; border-radius: 999px; background: #34d399; display: inline-block; box-shadow: 0 0 18px rgba(52,211,153,.8); animation: blink .9s infinite; }
+        @keyframes blink { 50% { opacity: .35; } }
+        #story-scroll { flex: 1; overflow-y: auto; min-height: 0; }
+        #story-board { max-width: 980px; margin: 0 auto; padding: 20px 24px 32px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-content: start; }
+        main { display: flex; flex-direction: column; height: 100%; }
+        main.live-running #story-scroll,
+        main.live-running .flow-map,
+        main.live-running #flow-status,
+        main.live-running .demo-action-banner,
+        main.live-running #teleprompter .demo-mission,
+        main.live-running #teleprompter .h-1 { display: none; }
+        main.live-running #teleprompter {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 55;
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(52,211,153,.35);
+            background: rgba(5,5,4,.94);
+        }
+        main.live-running #script-line { font-size: 13px; }
+        main.live-running { display: flex; flex-direction: column; }
+        #app-frame { display: none; }
+        #app-frame.live-demo-frame {
+            display: block;
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+            margin: 0;
+            border-radius: 0;
+            border: none;
+            box-shadow: inset 0 0 0 2px rgba(52,211,153,.35);
+            background: #020617;
+            opacity: 1;
+            pointer-events: auto;
+        }
+        main.live-running #app-frame.live-demo-frame { margin-top: 52px; }
+        body.demo-live-fullscreen .demo-shell { grid-template-columns: 1fr; }
+        body.demo-live-fullscreen aside { display: none; }
+        body.demo-live-fullscreen main { height: 100vh; }
+        #demo-finale { position: absolute; inset: 0; z-index: 60; display: none; align-items: center; justify-content: center; background: rgba(5,5,4,.86); backdrop-filter: blur(10px); }
+        #demo-finale.visible { display: flex; }
+        .finale-card { width: min(560px, calc(100% - 48px)); text-align: center; padding: 36px 32px; border-radius: 28px; background: linear-gradient(160deg, rgba(16,185,129,.16), rgba(28,25,23,.92)); border: 1px solid rgba(52,211,153,.4); box-shadow: 0 30px 90px rgba(0,0,0,.5); }
+        .copilot-note { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+        .copilot-note div { border: 1px solid rgba(196,181,253,.18); background: rgba(76,29,149,.16); border-radius: 16px; padding: 12px; }
+        /* Modern controls — no native OS chrome */
+        .demo-control {
+            width: 100%;
+            appearance: none;
+            -webkit-appearance: none;
+            background: rgba(12,10,9,.92);
+            border: 1px solid rgba(120,113,108,.35);
+            color: #fafaf9;
+            border-radius: 12px;
+            padding: 11px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: .01em;
+            line-height: 1.3;
+            transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+            outline: none;
+        }
+        .demo-control:hover {
+            border-color: rgba(52,211,153,.45);
+            background: rgba(16,185,129,.06);
+        }
+        .demo-control:focus-visible {
+            border-color: rgba(52,211,153,.65);
+            box-shadow: 0 0 0 3px rgba(16,185,129,.18);
+        }
+        select.demo-control {
+            padding-right: 2.5rem;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2334d399' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+        select.demo-control option {
+            background: #1c1917;
+            color: #fafaf9;
+            padding: 8px;
+        }
+        .demo-btn-primary {
+            width: 100%;
+            border: none;
+            border-radius: 14px;
+            padding: 14px 18px;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: #052e16;
+            background: linear-gradient(135deg, #34d399 0%, #10b981 55%, #059669 100%);
+            box-shadow: 0 4px 24px rgba(16,185,129,.35), inset 0 1px 0 rgba(255,255,255,.25);
+            transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+        }
+        .demo-btn-primary:hover:not(:disabled) {
+            filter: brightness(1.06);
+            box-shadow: 0 8px 32px rgba(16,185,129,.45), inset 0 1px 0 rgba(255,255,255,.3);
+            transform: translateY(-1px);
+        }
+        .demo-btn-primary:active:not(:disabled) { transform: translateY(0); }
+        .demo-btn-secondary {
+            width: 100%;
+            border-radius: 14px;
+            padding: 12px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .03em;
+            color: #6ee7b7;
+            background: rgba(16,185,129,.08);
+            border: 1px solid rgba(52,211,153,.28);
+            transition: background .2s ease, border-color .2s ease, transform .15s ease;
+        }
+        .demo-btn-secondary:hover:not(:disabled) {
+            background: rgba(16,185,129,.14);
+            border-color: rgba(52,211,153,.5);
+            transform: translateY(-1px);
+        }
+        .demo-btn-ghost {
+            border-radius: 12px;
+            padding: 11px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #6ee7b7;
+            background: rgba(16,185,129,.08);
+            border: 1px solid rgba(52,211,153,.28);
+            white-space: nowrap;
+            transition: background .2s ease, border-color .2s ease;
+        }
+        .demo-btn-ghost:hover { background: rgba(16,185,129,.16); border-color: rgba(52,211,153,.5); }
+        .demo-btn-link {
+            display: block;
+            width: 100%;
+            text-align: center;
+            border-radius: 14px;
+            padding: 12px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .03em;
+            color: #c4b5fd;
+            background: rgba(139,92,246,.12);
+            border: 1px solid rgba(167,139,250,.28);
+            text-decoration: none;
+            transition: background .2s ease, border-color .2s ease, transform .15s ease;
+        }
+        .demo-btn-link:hover {
+            background: rgba(139,92,246,.2);
+            border-color: rgba(167,139,250,.45);
+            transform: translateY(-1px);
+        }
+        .demo-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: #78716c;
+            margin: 14px 0 6px;
+        }
+        /* Slim modern scrollbars */
+        aside, #story-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(52,211,153,.35) transparent;
+        }
+        aside::-webkit-scrollbar, #story-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        aside::-webkit-scrollbar-track, #story-scroll::-webkit-scrollbar-track { background: transparent; }
+        aside::-webkit-scrollbar-thumb, #story-scroll::-webkit-scrollbar-thumb {
+            background: rgba(52,211,153,.3);
+            border-radius: 999px;
+        }
+        aside::-webkit-scrollbar-thumb:hover, #story-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(52,211,153,.5);
+        }
+        #intro-video { border-radius: 16px; }
+        #intro-video::-webkit-media-controls-panel { background: rgba(12,10,9,.85); }
+        @media (max-width: 1024px) {
+            body { min-height: 100%; overflow: auto; }
+            .demo-shell.relative { min-height: 100vh; height: auto; display: flex; flex-direction: column; }
+            aside { height: auto !important; }
+            main { height: auto; min-height: 720px; }
+            #story-scroll { flex: none; overflow: visible; }
+            #story-board { grid-template-columns: 1fr; padding: 16px 14px 28px; }
+            #story-board .step { grid-column: span 1 / span 1; }
+            .flow-map { width: calc(100% - 24px); grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+            .flow-node { min-height: 48px; padding: 8px; }
+            .flow-node::after { display: none; }
+            .flow-node p.text-xs { display: none; }
+            #app-frame.live-demo-frame { margin: 12px; height: 70vh; min-height: 520px; border-radius: 18px; }
+            .copilot-note { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 640px) {
+            #teleprompter { padding: 14px 12px; }
+            #script-line { font-size: 12px; line-height: 1.45; }
+            aside { padding: 18px; }
+            aside h1 { font-size: 34px; }
+            .demo-action-banner { width: calc(100% - 24px); font-size: 10px; }
+            .live-app-status { top: 68px; right: 10px; width: min(260px, calc(100% - 20px)); }
+            main.live-running #app-frame.live-demo-frame { margin-top: 72px; }
+            .demo-mission { font-size: 11px; padding: 8px 10px; }
+        }
     </style>
 </head>
 <body class="h-full overflow-hidden">
     <div class="fixed inset-0 opacity-25 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1800&q=80')"></div>
-    <div class="relative z-10 h-full grid grid-cols-[420px_1fr]">
-        <aside class="p-6 glass h-full overflow-y-auto">
+    <div class="demo-shell relative z-10 h-full grid grid-cols-[390px_1fr]">
+        <aside class="p-5 glass h-full overflow-y-auto">
             <div class="mb-6">
                 <p class="text-[10px] text-emerald-400 font-black uppercase tracking-[0.3em]">Battle #1 Creative Apps</p>
                 <h1 class="text-4xl font-black mt-2">AgriValue IQ</h1>
-                <p class="text-sm text-stone-300 mt-3 leading-relaxed">A friendly AI story that shows how farmers can turn raw harvest into higher-value products.</p>
+                <p class="text-sm text-stone-300 mt-3 leading-relaxed">A friendly AI story for Battle #1: farmers sell raw to silos and lose the premium — our creative app solves it with agent interaction, not spreadsheets.</p>
             </div>
 
             <div class="grid grid-cols-3 gap-2 mb-6">
@@ -40,58 +301,88 @@
                 </div>
             </div>
 
+            <div class="metric-explainer">
+                <div><strong class="text-emerald-300">15% yield:</strong> 1 ton of olives can become about 150 liters of oil. For 15T, Matteo sees about 2,250L.</div>
+                <div><strong class="text-indigo-300">933 bottles:</strong> 1 ton of grapes can become roughly 933 bottles of wine. That is the value hiding inside the harvest.</div>
+                <div><strong class="text-amber-300">$450 premium:</strong> DOP/organic proof can add $450 per ton for olive oil. Sofia checks the papers before Don signs.</div>
+            </div>
+
             <div class="space-y-3 mb-6">
-                <div class="agent glass rounded-2xl p-4" data-agent="0">
+                <div class="agent glass rounded-2xl p-3.5" data-agent="0">
                     <p class="text-amber-300 text-xs font-black uppercase">Don Salvatore</p>
-                    <p class="text-sm font-bold mt-1">Friendly Guide</p>
-                    <p class="text-xs text-stone-400 mt-2">Listens to the farmer, asks the right helpers, and gives the final go/no-go decision.</p>
+                    <p class="text-sm font-bold mt-1">The Sicilian Guide</p>
+                    <p class="text-xs text-stone-400 mt-2">Listens to the farmer, says "andiamo", and sends the job to the right helper.</p>
                 </div>
-                <div class="agent glass rounded-2xl p-4" data-agent="1">
+                <div class="agent glass rounded-2xl p-3.5" data-agent="1">
                     <p class="text-emerald-300 text-xs font-black uppercase">Matteo</p>
                     <p class="text-sm font-bold mt-1">Numbers Helper</p>
-                    <p class="text-xs text-stone-400 mt-2">Turns tons into liters/bottles and estimates costs, so earnings are easy to understand.</p>
+                    <p class="text-xs text-stone-400 mt-2">Turns tons into liters, bottles, costs, and "mamma mia, this pays better" numbers.</p>
                 </div>
-                <div class="agent glass rounded-2xl p-4" data-agent="2">
+                <div class="agent glass rounded-2xl p-3.5" data-agent="2">
                     <p class="text-indigo-300 text-xs font-black uppercase">Sofia DOP</p>
                     <p class="text-sm font-bold mt-1">Quality Helper</p>
-                    <p class="text-xs text-stone-400 mt-2">Checks quality rules and tells you if the harvest can qualify for a better price.</p>
+                    <p class="text-xs text-stone-400 mt-2">Checks papers, runs Vision scan on crop photos, and saves every trade to agent memory. No papers, no premium, capisce?</p>
                 </div>
             </div>
 
-            <button id="btn-start" class="w-full bg-emerald-500 text-stone-950 rounded-2xl py-4 text-sm font-black uppercase tracking-widest">Start 2-Min Judge Demo</button>
-            <button id="btn-audio" class="w-full mt-3 glass rounded-2xl py-3 text-xs font-black uppercase tracking-wider border border-emerald-500/30 text-emerald-300">Audio Narration: On</button>
-            <p id="audio-help" class="text-[10px] text-stone-400 mt-2 leading-relaxed">Voice guide explains each scene step-by-step while the teleprompter advances.</p>
-            <a href="index.html" class="block w-full mt-4 text-center bg-violet-500/20 hover:bg-violet-500/30 border border-violet-400/35 text-violet-200 rounded-2xl py-3 text-xs font-black uppercase tracking-wider transition-colors">← Back to Main App</a>
+            <button id="btn-start" class="demo-btn-primary">Start 2-Min Judge Demo</button>
+            <button id="btn-audio" class="demo-btn-secondary mt-3">Audio Narration: On</button>
+            <label for="voice-style" class="demo-label">Narration style</label>
+            <select id="voice-style" class="demo-control">
+                <option value="sicilian">Sicilian storyteller</option>
+                <option value="italian">Italian narrator</option>
+                <option value="english">English presenter</option>
+            </select>
+            <label for="voice-pick" class="demo-label">Narrator voice</label>
+            <div class="grid grid-cols-[1fr_auto] gap-2">
+                <select id="voice-pick" class="demo-control"><option value="auto">Auto (best available)</option></select>
+                <button id="btn-test-voice" class="demo-btn-ghost" title="Hear a sample">▶ Test</button>
+            </div>
+            <p id="audio-help" class="text-[11px] text-stone-500 mt-2 leading-relaxed">Pick a voice and press Test. Voices marked Natural or Online sound the least robotic.</p>
+            <a href="index.html" class="demo-btn-link mt-4">← Back to Main App</a>
         </aside>
 
         <main class="relative h-full">
-            <div id="teleprompter" class="absolute top-0 left-0 right-0 z-30 bg-black/80 border-b border-emerald-500/30 px-6 py-4">
-                <p id="script-line" class="text-emerald-300 text-sm font-bold text-center">Ready: click Start and follow a simple step-by-step story.</p>
+            <div id="teleprompter" class="flex-shrink-0 bg-black/80 border-b border-emerald-500/30 px-6 py-4">
+                <p id="script-line" class="text-emerald-300 text-sm font-bold text-center">Ready: click Start and follow the problem → agent solution story.</p>
+                <p class="demo-mission"><strong>The problem:</strong> Sicilian smallholders sell olives and grapes to bulk silos at commodity prices, so value leaves the village. <strong>Our creative app:</strong> friendly AI agents work together — Don listens, Matteo runs Fabric IQ math, Sofia runs Vision scan + Foundry compliance, agents remember every trade, and Copilot drafts the contract.</p>
                 <div class="h-1 bg-stone-800 mt-3 rounded-full overflow-hidden max-w-3xl mx-auto">
                     <div id="progress-bar" class="h-full bg-emerald-400 progress" style="width:0%"></div>
                 </div>
+                <div id="demo-action-banner" class="demo-action-banner">Ready when you are, compare.</div>
             </div>
 
-            <div id="story-board" class="absolute inset-0 pt-24 p-8 grid grid-cols-2 gap-5 content-start">
+            <p id="flow-status">Workflow 1/6 — Harvest enters the chain</p>
+            <div id="flow-map" class="flow-map">
+                <div class="flow-node current" data-flow="0"><span class="wire-dot"></span><p class="text-[10px] text-emerald-300 font-black uppercase mt-2">Harvest</p><p class="text-xs text-stone-300">Farmer request</p></div>
+                <div class="flow-node" data-flow="1"><span class="wire-dot"></span><p class="text-[10px] text-amber-300 font-black uppercase mt-2">Don</p><p class="text-xs text-stone-300">Routes the work</p></div>
+                <div class="flow-node" data-flow="2"><span class="wire-dot"></span><p class="text-[10px] text-emerald-300 font-black uppercase mt-2">Matteo</p><p class="text-xs text-stone-300">Runs value math</p></div>
+                <div class="flow-node" data-flow="3"><span class="wire-dot"></span><p class="text-[10px] text-indigo-300 font-black uppercase mt-2">Sofia</p><p class="text-xs text-stone-300">Checks quality</p></div>
+                <div class="flow-node" data-flow="4"><span class="wire-dot"></span><p class="text-[10px] text-indigo-300 font-black uppercase mt-2">Vision</p><p class="text-xs text-stone-300">Scans crop photo</p></div>
+                <div class="flow-node" data-flow="5"><span class="wire-dot"></span><p class="text-[10px] text-violet-300 font-black uppercase mt-2">Copilot</p><p class="text-xs text-stone-300">Drafts contract</p></div>
+            </div>
+
+            <div id="story-scroll">
+            <div id="story-board">
                 <div class="step glass rounded-3xl p-4 visible col-span-2" data-step="0">
                     <div class="grid grid-cols-[1.2fr_.8fr] gap-4 items-center">
                         <video id="intro-video" class="w-full rounded-2xl border border-emerald-500/20 shadow-2xl shadow-emerald-950/30" src="media/agrivalue-iq-intro.mp4" muted playsinline controls poster="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80"></video>
                         <div>
                             <p class="text-[10px] text-emerald-400 font-black uppercase tracking-widest">Intro Video</p>
                             <h2 class="text-2xl font-black mt-2">From raw harvest to certified value.</h2>
-                            <p class="text-stone-300 text-sm mt-3">Use this generated video as the README hero or the first 12 seconds of the challenge submission recording.</p>
+                            <p class="text-stone-300 text-sm mt-3">A friendly AI story that shows how farmers can turn raw harvest into higher-value products — Don Salvatore listens, Matteo finds the money, Sofia checks the papers, and Copilot packages the deal.</p>
                         </div>
                     </div>
                 </div>
                 <div class="step glass rounded-3xl p-6" data-step="1">
                     <p class="text-[10px] text-emerald-400 font-black uppercase tracking-widest">Problem</p>
-                    <h2 class="text-2xl font-black mt-2">Farmers sell raw. Value leaves the village.</h2>
-                    <p class="text-stone-300 text-sm mt-3">AgriValue compares a basic sale with smarter local options so farmers can keep more value.</p>
+                    <h2 class="text-2xl font-black mt-2">Raw sale vs. local value</h2>
+                    <p class="text-stone-300 text-sm mt-3"><strong class="text-amber-300">Path A:</strong> sell to the silo — fast cash, low margin. <strong class="text-emerald-300">Path B:</strong> process locally — better price. One harvest, three AI helpers, one contract-ready result.</p>
                 </div>
                 <div class="step glass rounded-3xl p-6" data-step="2">
                     <p class="text-[10px] text-amber-400 font-black uppercase tracking-widest">Agent Handoff</p>
                     <h2 class="text-2xl font-black mt-2">Don Salvatore routes the request.</h2>
-                    <p class="text-stone-300 text-sm mt-3">Matteo models yield and costs. Sofia DOP checks standards. The seal is issued only when both pass.</p>
+                    <p class="text-stone-300 text-sm mt-3">He is not guessing. He asks Matteo for yield and Sofia for compliance. Only then: Golden Seal.</p>
                 </div>
                 <div class="step glass rounded-3xl p-6" data-step="3">
                     <p class="text-[10px] text-emerald-400 font-black uppercase tracking-widest">Matteo Math</p>
@@ -101,44 +392,148 @@
                 <div class="step glass rounded-3xl p-6" data-step="4">
                     <p class="text-[10px] text-indigo-400 font-black uppercase tracking-widest">Sofia Quality Rule</p>
                     <h2 class="text-2xl font-black mt-2">Acidity ≤ 0.3% unlocks Olio DOP Sicilia.</h2>
-                    <p class="text-stone-300 text-sm mt-3">Foundry IQ grounds the recommendation and applies the $450/ton premium.</p>
+                    <p class="text-stone-300 text-sm mt-3">Foundry IQ grounds the recommendation and applies the $450/ton premium. Then Vision scans a crop photo for grade and profit multiplier.</p>
                 </div>
-                <div class="step glass rounded-3xl p-6 col-span-2" data-step="5">
-                    <p class="text-[10px] text-violet-400 font-black uppercase tracking-widest">Copilot Assistant</p>
-                    <h2 class="text-2xl font-black mt-2">The same intelligence becomes a Fair-Trade contract in VS Code.</h2>
-                    <code class="block text-xs text-emerald-300 bg-black/40 rounded-2xl p-4 mt-3">@agrivalue-iq generate_supply_contract crop="Olive Oil" qtyTons=15 isOrganic=true</code>
+                <div class="step glass rounded-3xl p-6" data-step="5">
+                    <p class="text-[10px] text-indigo-400 font-black uppercase tracking-widest">Foundry Vision Scan</p>
+                    <h2 class="text-2xl font-black mt-2">Photo → Grade A+ → 1.15× boost</h2>
+                    <p class="text-stone-300 text-sm mt-3">Snap the harvest. Vision grades quality and lifts Path B profit. Watch the laser scan in the live app.</p>
+                </div>
+                <div class="step glass rounded-3xl p-6 col-span-2" data-step="6">
+                    <p class="text-[10px] text-violet-400 font-black uppercase tracking-widest">Copilot + Agent Memory</p>
+                    <h2 class="text-2xl font-black mt-2">Why the Copilot step matters.</h2>
+                    <p class="text-stone-300 text-sm mt-3">The app does not stop at a pretty dashboard. Agents <strong class="text-emerald-300">remember every trade</strong> in history, then send grounded crop, vision, yield, and certification context to GitHub Copilot through our MCP server for a contract draft.</p>
+                    <code class="block text-xs text-emerald-300 bg-black/40 rounded-2xl p-4 mt-3">@agrivalue-iq generate_supply_contract crop="Olive Oil" qtyTons=15 isOrganic=true buyer="Cooperativa Valle del Belice"</code>
+                    <div class="copilot-note">
+                        <div><p class="text-[10px] text-violet-300 font-black uppercase">Input</p><p class="text-xs text-stone-300 mt-1">Uses the live optimization: crop, quantity, DOP flag, processor, and premium.</p></div>
+                        <div><p class="text-[10px] text-violet-300 font-black uppercase">AI Work</p><p class="text-xs text-stone-300 mt-1">Copilot drafts the Fair-Trade agreement from the AgriValue MCP tool.</p></div>
+                        <div><p class="text-[10px] text-violet-300 font-black uppercase">Output</p><p class="text-xs text-stone-300 mt-1">A practical contract draft the cooperative can review and customize.</p></div>
+                    </div>
                 </div>
             </div>
+            </div>
 
-            <iframe id="app-frame" class="absolute inset-0 w-full h-full border-0 opacity-0 pointer-events-none transition-opacity duration-700" src="index.html"></iframe>
+            <iframe id="app-frame" class="border-0" src="about:blank" title="AgriValue live app demo"></iframe>
+            <div id="live-app-status" class="live-app-status">
+                <p class="text-[10px] text-emerald-300 font-black uppercase tracking-widest"><span class="live-dot mr-2"></span>Live App Action</p>
+                <p id="live-app-text" class="text-sm text-white font-bold mt-1">The embedded app is about to run.</p>
+                <p class="text-xs text-stone-400 mt-1">Cue only — console stays visible at the bottom of the app.</p>
+            </div>
+
+            <div id="demo-finale">
+                <div class="finale-card">
+                    <p class="text-[10px] text-emerald-400 font-black uppercase tracking-[0.3em]">Demo Complete</p>
+                    <h2 class="text-3xl font-black mt-3">Mamma mia — andiamo!</h2>
+                    <p class="text-stone-300 text-sm mt-3 leading-relaxed">Harvest → agents → vision → contract. You saw the full chain. Now open the app and run your own deal.</p>
+                    <div class="grid gap-3 mt-6">
+                        <a href="index.html" class="demo-btn-primary text-center no-underline">Open the Main App →</a>
+                        <button id="btn-replay" class="demo-btn-secondary">↺ Replay the Demo</button>
+                        <button id="btn-close-finale" class="w-full text-stone-500 hover:text-stone-300 text-xs font-semibold py-2 transition-colors bg-transparent border-none">Stay on this page</button>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
     <script>
         const SCRIPT = [
-            { at: 0, text: "Welcome! Let us begin: this short video shows how a harvest can become more valuable.", agent: 0, step: 0, action: playIntroVideo },
-            { at: 12, text: "Here is the problem in simple words: farmers work hard, but often earn too little from raw sales.", agent: 0, step: 1 },
-            { at: 22, text: "Don Salvatore is your guide. He asks two helpers to check money and quality.", agent: 0, step: 2 },
-            { at: 34, text: "Matteo handles the numbers. For example, 15 tons of olives can become around 2,250 liters of oil.", agent: 1, step: 3 },
-            { at: 45, text: "Sofia checks quality rules. If acidity is low enough, the product can earn a premium label.", agent: 2, step: 4 },
-            { at: 50, text: "Now we open the live app so you can see the same journey in action.", action: () => goApp("?autoplay=1") },
-            { at: 78, text: "This panel shows what each helper decided, plus the final Golden Seal result.", agent: 0 },
-            { at: 96, text: "With one click, Copilot can turn these results into a fair-trade contract draft.", step: 5, action: showCopilotPrompt },
-            { at: 112, text: "That is the idea: simple guidance, clear numbers, and better decisions for farmers.", agent: 0 },
+            { at: 0, text: "Farmers sell raw to silos and lose the premium. AgriValue fixes that with three AI helpers — Don, Matteo, Sofia — plus Copilot for the contract.", agent: 0, step: 0, flow: 0, actionLabel: "Problem → agent solution", action: playIntroVideo },
+            { at: 8, text: "Path A is quick silo cash. Path B is local processing — more work, better margin. That is the choice this app makes clear.", agent: 0, step: 1, flow: 0, actionLabel: "Path A vs Path B" },
+            { at: 18, text: "Don Salvatore receives the request. He sends money to Matteo and papers to Sofia. Simple, capisce.", agent: 0, step: 2, flow: 1, actionLabel: "Step 2/6 — Don routes the request" },
+            { at: 29, text: "Matteo turns tons into liters, bottles, costs, and the final value of the product.", agent: 1, step: 3, flow: 2, actionLabel: "Step 3/6 — Matteo runs value math" },
+            { at: 40, text: "Sofia checks DOP and organic proof. No papers, no premium. She is friendly, but strict.", agent: 2, step: 4, flow: 3, actionLabel: "Step 4/6 — Sofia checks compliance" },
+            { at: 52, text: "Good. Compliance is clear. Now Sofia hands off to Foundry Vision — watch the workflow move to the camera step.", agent: 2, flow: 3, actionLabel: "Handoff pause · Sofia → Vision", bridge: true },
+            { at: 58, text: "Vision scans the photo — Grade A plus, one point one five times profit on Path B.", agent: 2, step: 5, flow: 4, actionLabel: "Step 5/6 — Vision scan → profit multiplier" },
+            { at: 70, text: "Now watch the real app below. Full screen — vision scan first, then the pipeline. Keep your eyes on the terminal.", flow: 4, live: true, actionLabel: "👇 Live app — watch the terminal" },
+            { at: 86, text: "See the left panel: olive oil, fifteen metric tons, DOP on. The vision laser scans the harvest photo.", agent: 0, flow: 4, live: true, actionLabel: "Live: Vision scan + Olive Oil 15 MT DOP", action: () => updateLiveCue("👇 Left: Olive Oil · 15 MT · DOP · Vision scan running…") },
+            { at: 98, text: "Now the center panel: Path A versus Path B, added value, and the trade saved to agent memory.", agent: 1, flow: 4, live: true, actionLabel: "Live: pipeline results + agent memory", action: () => updateLiveCue("👇 Center: Path A vs B · trade saved to Agent Memory") },
+            { at: 110, text: "Last step: Copilot turns the intelligence into a contract. Don Salvatore remembers the trade.", step: 6, flow: 5, actionLabel: "Step 6/6 — Copilot + memory", action: showCopilotPrompt },
+            { at: 122, text: "That is the full chain — harvest, agents, vision, memory, contract. Mamma mia, what a route! Andiamo — go try the app.", agent: 0, flow: 5, actionLabel: "Full chain complete" },
         ];
 
-        const TOTAL_SEC = 120;
+        const TOTAL_SEC = 128;
+        const FLOW_LABELS = ["Harvest enters the chain", "Don routes the work", "Matteo runs value math", "Sofia checks quality", "Vision scans the crop", "Copilot drafts contract"];
         let elapsed = 0;
         let timer = null;
         let audioNarration = true;
+        let narratorStyle = "sicilian";
+        let availableVoices = [];
+        let liveCueTimers = [];
+        let chosenVoiceURI = "auto";
 
         document.getElementById("btn-start").onclick = startDemo;
         document.getElementById("btn-audio").onclick = toggleAudioNarration;
+        document.getElementById("btn-replay").onclick = () => { hideFinale(); startDemo(); };
+        document.getElementById("btn-close-finale").onclick = hideFinale;
+        document.getElementById("btn-test-voice").onclick = () => {
+            narrate(narratorStyle === "english"
+                ? "Hello! This is your AgriValue narrator. From the harvest, to the contract, step by step."
+                : "Ciao compare! This is Don Salvatore. From the harvest, to the contract — andiamo, step by step.");
+        };
+        document.getElementById("voice-style").onchange = (event) => {
+            narratorStyle = event.target.value;
+            populateVoiceList();
+        };
+        document.getElementById("voice-pick").onchange = (event) => {
+            chosenVoiceURI = event.target.value;
+        };
+
+        if ("speechSynthesis" in window) {
+            availableVoices = window.speechSynthesis.getVoices();
+            populateVoiceList();
+            window.speechSynthesis.onvoiceschanged = () => {
+                availableVoices = window.speechSynthesis.getVoices();
+                populateVoiceList();
+            };
+        }
+
+        function voiceScore(v) {
+            let score = 0;
+            const name = v.name || "";
+            const lang = (v.lang || "").toLowerCase();
+            if (/natural|online|neural/i.test(name)) score += 40;
+            if (/google/i.test(name)) score += 20;
+            if (narratorStyle === "english") {
+                if (lang.startsWith("en")) score += 30;
+            } else {
+                if (lang.startsWith("it")) score += 30;
+                else if (lang.startsWith("en")) score += 10;
+            }
+            return score;
+        }
+
+        function populateVoiceList() {
+            const select = document.getElementById("voice-pick");
+            const sorted = [...availableVoices].sort((a, b) => voiceScore(b) - voiceScore(a));
+            select.innerHTML = '<option value="auto">Auto (best available)</option>' +
+                sorted.map(v => `<option value="${v.voiceURI}">${v.name} — ${v.lang}</option>`).join("");
+            select.value = sorted.some(v => v.voiceURI === chosenVoiceURI) ? chosenVoiceURI : "auto";
+            chosenVoiceURI = select.value;
+        }
+
+        function resetDemoVisuals() {
+            exitLiveApp();
+            document.querySelectorAll(".step").forEach(el => {
+                el.classList.toggle("visible", Number(el.dataset.step) === 0);
+                el.classList.remove("current");
+            });
+            document.querySelectorAll(".agent").forEach(el => el.classList.remove("active"));
+            updateDemoFlow(0);
+            document.getElementById("flow-status").textContent = `Workflow 1/6 — ${FLOW_LABELS[0]}`;
+            const banner = document.getElementById("demo-action-banner");
+            banner.classList.remove("visible", "handoff");
+            document.getElementById("story-scroll").scrollTop = 0;
+            document.getElementById("progress-bar").style.width = "0%";
+        }
 
         function startDemo() {
+            clearInterval(timer);
+            hideFinale();
+            resetDemoVisuals();
             elapsed = -1;
-            document.getElementById("btn-start").disabled = true;
-            narrate("Welcome to AgriValue IQ. I will guide you step by step, in simple words, as you watch each scene.");
+            const startBtn = document.getElementById("btn-start");
+            startBtn.disabled = true;
+            startBtn.textContent = "Demo Running…";
             tick();
             timer = setInterval(tick, 1000);
         }
@@ -149,38 +544,137 @@
             SCRIPT.filter(s => s.at === elapsed).forEach(runCue);
             if (elapsed >= TOTAL_SEC) {
                 clearInterval(timer);
-                document.getElementById("script-line").textContent = "Demo complete — stop recording.";
-                stopNarration();
+                finishDemo();
             }
+        }
+
+        function finishDemo() {
+            exitLiveApp();
+            document.getElementById("script-line").textContent = "Demo complete — mamma mia, andiamo!";
+            const startBtn = document.getElementById("btn-start");
+            startBtn.disabled = false;
+            startBtn.textContent = "Restart 2-Min Judge Demo";
+            document.getElementById("demo-finale").classList.add("visible");
+        }
+
+        function hideFinale() {
+            document.getElementById("demo-finale").classList.remove("visible");
         }
 
         function runCue(cue) {
             document.getElementById("script-line").textContent = cue.text;
-            narrate(cue.text);
+            if (cue.live) ensureLiveFocus("?autoplay=1");
+            if (!cue.bridge) {
+                if (cue.live) narrateAfterLiveFocus(cue.text, cue.at === 70 ? 2200 : 800);
+                else narrate(cue.text);
+            } else {
+                stopNarration();
+            }
             if (typeof cue.step === "number") {
-                document.querySelectorAll(".step").forEach(el => el.classList.toggle("visible", Number(el.dataset.step) <= cue.step));
+                document.querySelectorAll(".step").forEach(el => {
+                    const isVisible = Number(el.dataset.step) <= cue.step;
+                    const isCurrent = Number(el.dataset.step) === cue.step;
+                    el.classList.toggle("visible", isVisible);
+                    el.classList.toggle("current", isCurrent);
+                });
+                document.querySelector(".step.current")?.scrollIntoView({ behavior: "smooth", block: "center" });
             }
             if (typeof cue.agent === "number") {
                 document.querySelectorAll(".agent").forEach(el => el.classList.toggle("active", Number(el.dataset.agent) === cue.agent));
             }
+            if (typeof cue.flow === "number") updateDemoFlow(cue.flow);
+            if (cue.actionLabel) showActionBanner(cue.actionLabel, !!cue.bridge);
             cue.action?.();
         }
 
+        function showActionBanner(text, isHandoff = false) {
+            const banner = document.getElementById("demo-action-banner");
+            banner.textContent = text;
+            banner.classList.toggle("handoff", isHandoff);
+            banner.classList.add("visible");
+        }
+
+        function updateDemoFlow(activeIndex) {
+            document.querySelectorAll(".flow-node").forEach(el => {
+                const idx = Number(el.dataset.flow);
+                el.classList.toggle("done", idx < activeIndex);
+                el.classList.toggle("current", idx === activeIndex);
+            });
+            const status = document.getElementById("flow-status");
+            if (status) {
+                status.textContent = `Workflow ${activeIndex + 1}/6 — ${FLOW_LABELS[activeIndex] || ""}`;
+            }
+        }
+
+        let liveNarrateTimer = null;
+
+        function ensureLiveFocus(qs = "?autoplay=1") {
+            if (document.querySelector("main").classList.contains("live-running")) return;
+            goApp(qs);
+        }
+
+        function narrateAfterLiveFocus(text, delayMs = 800) {
+            clearTimeout(liveNarrateTimer);
+            liveNarrateTimer = setTimeout(() => narrate(text), delayMs);
+        }
+
         function goApp(qs) {
+            document.body.classList.add("demo-live-fullscreen");
+            document.querySelector("main").classList.add("live-running");
             const frame = document.getElementById("app-frame");
+            frame.classList.add("live-demo-frame");
             frame.src = "index.html" + (qs || "");
-            frame.classList.remove("opacity-0", "pointer-events-none");
+            updateLiveCue("👇 Watch the live app — autoplay starting…");
+            liveCueTimers.forEach(clearTimeout);
+            liveCueTimers = [
+                setTimeout(() => updateLiveCue("👇 Left panel: Vision laser scanning harvest photo…"), 2000),
+                setTimeout(() => updateLiveCue("👇 Vision Grade A+ at 1.15x — pipeline optimizing Path B…"), 5500),
+                setTimeout(() => updateLiveCue("👇 Center: results + trade saved to Agent Memory"), 9500),
+            ];
+        }
+
+        function updateLiveCue(text) {
+            const status = document.getElementById("live-app-status");
+            document.getElementById("live-app-text").textContent = text;
+            status.classList.add("visible");
         }
 
         function playIntroVideo() {
             const video = document.getElementById("intro-video");
+            if (!video) return;
+            video.muted = true;
             video.currentTime = 0;
             video.play().catch(() => {});
         }
 
+        playIntroVideo();
+
         function showCopilotPrompt() {
+            exitLiveApp();
+            document.querySelectorAll(".step").forEach(el => {
+                const isVisible = Number(el.dataset.step) <= 6;
+                const isCurrent = Number(el.dataset.step) === 6;
+                el.classList.toggle("visible", isVisible);
+                el.classList.toggle("current", isCurrent);
+            });
+            document.querySelector(".step.current")?.scrollIntoView({ behavior: "auto", block: "center", inline: "nearest" });
             const prompt = `@agrivalue-iq generate_supply_contract crop="Olive Oil" qtyTons=15 isOrganic=true buyer="Cooperativa Valle del Belice"\n\nCustomize this Fair-Trade agreement for EU DOP export to the US market.`;
             navigator.clipboard.writeText(prompt);
+            document.getElementById("live-app-status").classList.remove("visible");
+            showActionBanner("Copilot prompt copied: result becomes contract draft");
+        }
+
+        function exitLiveApp() {
+            clearTimeout(liveNarrateTimer);
+            liveNarrateTimer = null;
+            liveCueTimers.forEach(clearTimeout);
+            liveCueTimers = [];
+            document.getElementById("live-app-status").classList.remove("visible");
+            document.body.classList.remove("demo-live-fullscreen");
+            document.querySelector("main").classList.remove("live-running");
+            const frame = document.getElementById("app-frame");
+            frame.classList.remove("live-demo-frame");
+            frame.src = "about:blank";
         }
 
         function toggleAudioNarration() {
@@ -200,11 +694,31 @@
         function narrate(text) {
             if (!audioNarration || !("speechSynthesis" in window)) return;
             window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 1;
-            utterance.pitch = 1;
-            utterance.volume = 1;
-            window.speechSynthesis.speak(utterance);
+            const spokenText = narratorStyle === "italian"
+                ? text.replace(/\bPath A\b/g, "percorso A").replace(/\bPath B\b/g, "percorso B")
+                : text;
+            const voice = pickVoice();
+            // One utterance per sentence: natural micro-pauses, no monotone run-on.
+            const sentences = spokenText.match(/[^.!?]+[.!?]*/g) || [spokenText];
+            sentences.forEach(sentence => {
+                const utterance = new SpeechSynthesisUtterance(sentence.trim());
+                if (voice) utterance.voice = voice;
+                utterance.lang = narratorStyle === "italian" ? "it-IT" : (voice?.lang || "en-US");
+                utterance.rate = narratorStyle === "english" ? 1.0 : 0.97;
+                utterance.pitch = narratorStyle === "sicilian" ? 1.05 : 1.0;
+                utterance.volume = 1;
+                window.speechSynthesis.speak(utterance);
+            });
+        }
+
+        function pickVoice() {
+            const voices = availableVoices.length ? availableVoices : window.speechSynthesis.getVoices();
+            if (chosenVoiceURI !== "auto") {
+                const chosen = voices.find(v => v.voiceURI === chosenVoiceURI);
+                if (chosen) return chosen;
+            }
+            const sorted = [...voices].sort((a, b) => voiceScore(b) - voiceScore(a));
+            return sorted[0] || null;
         }
 
         function stopNarration() {

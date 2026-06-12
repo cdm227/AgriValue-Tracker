@@ -17,6 +17,7 @@ import {
   getFabricStatus,
 } from './lib/iq-data.js';
 import { getWorkIQStatus, notifyOptimizationComplete, notifyContractGenerated } from './lib/work-iq.js';
+import { recordTrade, getTradeHistory } from './lib/agent-memory.js';
 
 dotenv.config();
 
@@ -268,10 +269,11 @@ app.post('/api/evaluate-quality', (req, res) => {
 });
 
 app.post('/api/advisor', expensiveLimit, async (req, res) => {
-  const { message, crop, stream } = req.body;
+  const { message, crop, language, stream, recentTrades } = req.body;
   if (!message) return res.status(400).json({ error: "Message required" });
 
-  let reply = getAdvisorReply(message, { crop });
+  const memory = Array.isArray(recentTrades) && recentTrades.length ? recentTrades : getTradeHistory(5);
+  let reply = getAdvisorReply(message, { crop, language, recentTrades: memory });
 
   if (foundryConfigured() && message.length > 20) {
     try {
@@ -349,7 +351,21 @@ app.post('/api/optimize', expensiveLimit, async (req, res) => {
     result.workIQ = await notifyOptimizationComplete(result);
   }
 
+  recordTrade({
+    crop,
+    qtyTons: Number(qtyTons),
+    isOrganic: !!isOrganic,
+    qualityMultiplier: Number(qualityMultiplier) || 1,
+    addedValue: result.addedValue,
+    pathBNet: result.processedPath?.net,
+  });
+
   res.json(result);
+});
+
+app.get('/api/trade-history', (req, res) => {
+  const limit = Number(req.query.limit) || 20;
+  res.json({ trades: getTradeHistory(limit) });
 });
 
 app.post('/api/generate-contract', async (req, res) => {

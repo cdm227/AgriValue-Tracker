@@ -1,7 +1,9 @@
 import { apiFetch } from "./api-client.js";
+import { saveTradeRecord, renderTradeHistory, getRecentTradesForAdvisor } from "./trade-memory.js";
 
 let chart = null;
 let qualityMultiplier = 1.0;
+let lastVisionGrade = null;
 let lastOptimization = null;
 let currentCurrency = localStorage.getItem("agrivalue-currency") || "USD";
 
@@ -21,6 +23,8 @@ export function initApp() {
   setupCropListener();
   setupAdvisor();
   setupIntro();
+  renderTradeHistory(document.getElementById("trade-history-list"));
+  if (window.lucide) lucide.createIcons();
 }
 
 function money(value) {
@@ -225,40 +229,51 @@ export function logToConsole(text) {
   box.scrollTop = box.scrollHeight;
 }
 
+async function runVisionScan(crop, previewHtml) {
+  const laser = document.getElementById("scanner-laser");
+  const preview = document.getElementById("scan-preview");
+  if (!preview) return null;
+
+  if (previewHtml) preview.innerHTML = previewHtml;
+  if (laser) laser.style.display = "block";
+  logToConsole("Foundry Vision: Neural scan initiated…");
+
+  await new Promise((resolve) => setTimeout(resolve, 2200));
+
+  const res = await apiFetch("/api/evaluate-quality", {
+    method: "POST",
+    body: JSON.stringify({ crop }),
+  });
+  const data = await res.json();
+  qualityMultiplier = data.multiplier;
+  lastVisionGrade = data.grade;
+
+  document.getElementById("quality-badge")?.classList.remove("hidden");
+  document.getElementById("quality-multiplier-text").textContent =
+    `${data.grade} — ${data.multiplier}x multiplier`;
+
+  if (laser) laser.style.display = "none";
+  preview.innerHTML = `
+    <div class="text-left p-3 text-xs space-y-1 animate-fade-in">
+      <p class="font-bold text-emerald-400">Neural Audit Report</p>
+      <p><strong>Grade:</strong> ${data.grade}</p>
+      <p class="text-slate-400 text-[10px]">${data.analysis}</p>
+    </div>`;
+  logToConsole(`Vision scan: ${data.grade} (${data.multiplier}x)`);
+  return data;
+}
+
 window.runImageScan = async function (event) {
   const file = event.target.files[0];
   if (!file) return;
-
   const crop = document.getElementById("crop").value;
-  const laser = document.getElementById("scanner-laser");
-  const preview = document.getElementById("scan-preview");
+  const previewHtml = `<img src="${URL.createObjectURL(file)}" class="object-cover h-full w-full rounded-xl opacity-70" alt="crop">`;
+  await runVisionScan(crop, previewHtml);
+};
 
-  preview.innerHTML = `<img src="${URL.createObjectURL(file)}" class="object-cover h-full w-full rounded-xl opacity-70" alt="crop">`;
-  laser.style.display = "block";
-
-  logToConsole("Foundry Vision: Neural scan initiated…");
-
-  setTimeout(async () => {
-    const res = await apiFetch("/api/evaluate-quality", {
-      method: "POST",
-      body: JSON.stringify({ crop }),
-    });
-    const data = await res.json();
-    qualityMultiplier = data.multiplier;
-
-    document.getElementById("quality-badge")?.classList.remove("hidden");
-    document.getElementById("quality-multiplier-text").textContent =
-      `${data.grade} — ${data.multiplier}x multiplier`;
-
-    laser.style.display = "none";
-    preview.innerHTML = `
-      <div class="text-left p-3 text-xs space-y-1 animate-fade-in">
-        <p class="font-bold text-emerald-400">Neural Audit Report</p>
-        <p><strong>Grade:</strong> ${data.grade}</p>
-        <p class="text-slate-400 text-[10px]">${data.analysis}</p>
-      </div>`;
-    logToConsole(`Vision scan: ${data.grade} (${data.multiplier}x)`);
-  }, 2200);
+window.runDemoVisionScan = async function (crop = "Olive Oil") {
+  const previewHtml = `<img src="https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=500&q=80" class="object-cover h-full w-full rounded-xl opacity-70" alt="olive harvest">`;
+  return runVisionScan(crop, previewHtml);
 };
 
 window.optimizeChain = async function () {
@@ -290,6 +305,17 @@ window.optimizeChain = async function () {
     showResults(crop, qtyTons, data);
     typewriterRule(data.processedPath.foundryIQRule);
     loadCropInsights(crop, qtyTons);
+
+    saveTradeRecord({
+      crop,
+      qtyTons: Number(qtyTons),
+      isOrganic,
+      qualityMultiplier,
+      qualityGrade: lastVisionGrade,
+      addedValue: data.addedValue,
+      pathBNet: data.processedPath?.net,
+    });
+    renderTradeHistory(document.getElementById("trade-history-list"));
 
     if (data.workIQ?.sent) {
       logToConsole(`Work IQ: Teams notification sent via ${data.workIQ.channel}`);
@@ -559,7 +585,7 @@ function setupAdvisor() {
       if (!streamed) {
         const res = await apiFetch("/api/advisor", {
           method: "POST",
-          body: JSON.stringify({ message, crop }),
+          body: JSON.stringify({ message, crop, language: getAdvisorLanguageHint(), recentTrades: getRecentTradesForAdvisor(5) }),
         });
         if (!res.ok) throw new Error(`API ${res.status}`);
         const { reply } = await res.json();
@@ -570,6 +596,95 @@ function setupAdvisor() {
     } finally {
       aiBubble.classList.remove("typewriter-cursor");
     }
+  });
+
+  setupAdvisorVoiceInput();
+}
+
+function getAdvisorLanguageHint() {
+  const selected = document.getElementById("advisor-language")?.value || "auto";
+  if (selected !== "auto") return selected;
+  return navigator.language?.startsWith("it") ? "it-IT" : "auto";
+}
+
+function setupAdvisorVoiceInput() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const button = document.getElementById("advisor-voice-btn");
+  const input = document.getElementById("advisor-input");
+  const status = document.getElementById("advisor-voice-status");
+  const form = document.getElementById("advisor-form");
+  if (!button || !input || !status || !form) return;
+
+  if (!SpeechRecognition) {
+    button.disabled = true;
+    button.classList.add("opacity-50", "cursor-not-allowed");
+    button.title = "Voice input is not supported in this browser.";
+    status.textContent = "Voice input is not supported in this browser.";
+    status.classList.remove("hidden");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.interimResults = true;
+  recognition.continuous = false;
+
+  let listening = false;
+  let finalTranscript = "";
+
+  button.addEventListener("click", () => {
+    if (listening) {
+      recognition.stop();
+      return;
+    }
+
+    finalTranscript = "";
+    recognition.lang = getAdvisorLanguageHint() === "auto" ? "en-US" : getAdvisorLanguageHint();
+    status.textContent = recognition.lang.startsWith("it")
+      ? "Sto ascoltando... parla con Don Salvatore."
+      : "Listening... speak your advisor question.";
+    status.classList.remove("hidden");
+    button.classList.add("listening");
+    recognition.start();
+  });
+
+  recognition.addEventListener("start", () => {
+    listening = true;
+  });
+
+  recognition.addEventListener("result", (event) => {
+    let interim = "";
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) finalTranscript += transcript;
+      else interim += transcript;
+    }
+    input.value = `${finalTranscript}${interim}`.trim();
+  });
+
+  recognition.addEventListener("end", () => {
+    listening = false;
+    button.classList.remove("listening");
+    const message = input.value.trim();
+    if (message) {
+      status.textContent = getAdvisorLanguageHint().startsWith("it")
+        ? "Voce catturata. Chiedo a Don Salvatore..."
+        : "Voice captured. Asking Don Salvatore...";
+      form.requestSubmit();
+    } else {
+      status.textContent = getAdvisorLanguageHint().startsWith("it")
+        ? "Nessuna voce rilevata. Tocca il microfono e riprova."
+        : "No voice detected. Tap the mic and try again.";
+    }
+  });
+
+  recognition.addEventListener("error", (event) => {
+    listening = false;
+    button.classList.remove("listening");
+    status.textContent = event.error === "not-allowed"
+      ? "Microphone permission was blocked. Allow mic access to speak with the advisor."
+      : `Voice input stopped: ${event.error}`;
+    status.classList.remove("hidden");
   });
 }
 
@@ -591,7 +706,7 @@ async function streamAdvisor(message, crop, bubble) {
   try {
     const res = await apiFetch("/api/advisor", {
       method: "POST",
-      body: JSON.stringify({ message, crop, stream: true }),
+      body: JSON.stringify({ message, crop, language: getAdvisorLanguageHint(), stream: true, recentTrades: getRecentTradesForAdvisor(5) }),
     });
     if (!res.ok || !res.body || !res.headers.get("content-type")?.includes("event-stream")) return false;
 
@@ -649,10 +764,11 @@ window.addEventListener("DOMContentLoaded", initApp);
 // Demo mode auto-run
 if (new URLSearchParams(location.search).get("autoplay") === "1") {
   window.addEventListener("DOMContentLoaded", () => {
-    setTimeout(() => {
+    setTimeout(async () => {
       document.getElementById("crop").value = "Olive Oil";
       document.getElementById("qty").value = "15";
       document.getElementById("organic").checked = true;
+      await runDemoVisionScan("Olive Oil");
       optimizeChain();
     }, 2000);
   });

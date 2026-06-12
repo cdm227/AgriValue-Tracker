@@ -20,22 +20,22 @@
                     <i data-lucide="brain-circuit" class="w-12 h-12 text-slate-950"></i>
                 </div>
                 <h1 class="text-4xl font-black text-white mb-3">Welcome to <span class="shimmer-text">AgriValue IQ</span></h1>
-                <p class="text-slate-400 text-base leading-relaxed max-w-lg mx-auto">Many Sicilian farmers sell raw crops for too little. This app helps them choose better, more profitable routes.</p>
+                <p class="text-slate-400 text-base leading-relaxed max-w-lg mx-auto">Many Sicilian farmers sell raw crops for too little. Don Salvatore helps find the smarter route — more value, less "mamma mia".</p>
             </div>
             <div id="intro-step-1" class="intro-step hidden">
                 <i data-lucide="database" class="w-16 h-16 text-emerald-400 mx-auto mb-5"></i>
                 <h2 class="text-3xl font-black text-white mb-3">Fabric IQ</h2>
-                <p class="text-slate-400 max-w-lg mx-auto">We connect each crop to nearby processors, local prices, and transport costs so you can quickly see the best option.</p>
+                <p class="text-slate-400 max-w-lg mx-auto">We connect each crop to nearby processors, local prices, and transport costs so Matteo can say, "compare, this route pays better."</p>
             </div>
             <div id="intro-step-2" class="intro-step hidden">
                 <i data-lucide="shield-check" class="w-16 h-16 text-indigo-400 mx-auto mb-5"></i>
                 <h2 class="text-3xl font-black text-white mb-3">Foundry IQ</h2>
-                <p class="text-slate-400 max-w-lg mx-auto">A quality helper checks important rules (like DOP and organic standards) and shows when you can earn premium pricing.</p>
+                <p class="text-slate-400 max-w-lg mx-auto">Sofia DOP checks the serious papers — acidity, DOP, organic evidence — so the premium is earned, not guessed.</p>
             </div>
             <div id="intro-step-3" class="intro-step hidden">
                 <i data-lucide="users" class="w-16 h-16 text-violet-400 mx-auto mb-5"></i>
                 <h2 class="text-3xl font-black text-white mb-3">Work IQ + Copilot</h2>
-                <p class="text-slate-400 max-w-lg mx-auto">Then your team gets updates in Teams, and Copilot can draft a contract for you in just a few clicks.</p>
+                <p class="text-slate-400 max-w-lg mx-auto">Then Teams gets the message, Copilot drafts the contract, and Don Salvatore can relax for one espresso.</p>
             </div>
 
             <div class="flex items-center justify-center gap-2 mt-8 mb-6">
@@ -51,7 +51,7 @@
         </div>
     </div>
 
-    <header class="border-b border-slate-800/80 glass px-6 py-3 flex items-center justify-between shrink-0 z-10">
+    <header class="app-header border-b border-slate-800/80 glass px-6 py-3 flex items-center justify-between shrink-0 z-10">
         <div class="flex items-center gap-4">
             <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 text-slate-950 p-2.5 rounded-xl shadow-lg shadow-emerald-500/25">
                 <i data-lucide="brain-circuit" class="w-6 h-6"></i>
@@ -60,10 +60,10 @@
                 <h1 class="text-lg font-black tracking-tight text-white flex items-center gap-2">
                     AgriValue <span class="text-[9px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 px-2 py-0.5 rounded-full">IQ TERMINAL v3</span>
                 </h1>
-                <p class="text-[11px] text-slate-500">Smart helpers for Sicilian farmers: prices, quality checks, and team updates</p>
+                <p class="text-[11px] text-slate-500">Smart Sicilian helpers: prices, quality checks, contracts, and team updates</p>
                 <div id="boot-pill" class="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-emerald-500/35 bg-emerald-500/15 text-emerald-200 text-[10px] font-mono shadow-lg shadow-emerald-900/30">
                     <i data-lucide="terminal" class="w-3 h-3"></i>
-                    <span>AgriValue IQ Terminal v3 ready.</span>
+                    <span>Don Salvatore is ready. Andiamo.</span>
                 </div>
             </div>
             <div class="hidden md:flex items-center gap-2 ml-4">
@@ -103,7 +103,7 @@
 
     <main class="flex-1 flex overflow-hidden">
         <!-- Left column -->
-        <section class="w-[340px] xl:w-[380px] flex flex-col gap-4 p-4 overflow-y-auto shrink-0 border-r border-slate-800/50">
+        <section id="left-sidebar" class="left-sidebar w-[340px] xl:w-[380px] flex flex-col gap-4 p-4 overflow-y-auto shrink-0 border-r border-slate-800/50">
             <div class="glass rounded-2xl p-5">
                 <h2 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
                     <i data-lucide="sliders-horizontal" class="text-emerald-400 w-4 h-4"></i> Harvest Parameters
@@ -150,28 +150,30 @@
                 <div class="h-32 relative"><canvas id="trendChart"></canvas></div>
             </div>
 
-            <div class="glass rounded-2xl p-4 flex-1 min-h-[140px]">
-                <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center justify-between">
-                    <span class="flex items-center gap-2"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400"></i> Processor Network</span>
-                </h3>
-                <div id="processor-grid" class="grid grid-cols-2 gap-2"></div>
-            </div>
-
-            <div class="glass rounded-2xl p-4">
-                <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-2">
-                    <i data-lucide="scan" class="w-3.5 h-3.5 text-indigo-400"></i> Vision Quality Scan
-                </h3>
-                <div class="bg-slate-950/80 rounded-xl border border-slate-800 h-28 relative overflow-hidden flex items-center justify-center mb-2">
-                    <div id="scanner-laser" class="absolute w-full h-1 laser-line z-10" style="display:none"></div>
-                    <div id="scan-preview" class="text-slate-600 text-[10px] text-center px-3">
-                        <i data-lucide="image" class="w-8 h-8 mx-auto mb-1 opacity-40"></i>
-                        Upload crop photo
-                    </div>
+            <div class="left-tools-row">
+                <div class="glass rounded-2xl p-4 panel-card panel-card--processor">
+                    <h3 class="panel-card-title text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400"></i> Processor Network
+                    </h3>
+                    <div id="processor-grid" class="grid grid-cols-2 gap-2"></div>
                 </div>
-                <input type="file" id="file-uploader" accept="image/*" class="hidden" onchange="runImageScan(event)">
-                <button id="upload-photo-btn" onclick="document.getElementById('file-uploader').click()" class="upload-photo-btn w-full text-[11px] font-bold uppercase rounded-lg py-2 transition-colors tracking-wide">
-                    <i data-lucide="camera" class="w-3.5 h-3.5 mr-1.5"></i> Upload Photo
-                </button>
+
+                <div class="glass rounded-2xl p-4 panel-card panel-card--vision">
+                    <h3 class="panel-card-title text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="scan" class="w-3.5 h-3.5 text-indigo-400"></i> Vision Quality Scan
+                    </h3>
+                    <div class="bg-slate-950/80 rounded-xl border border-slate-800 h-28 relative overflow-hidden flex items-center justify-center mb-2">
+                        <div id="scanner-laser" class="absolute w-full h-1 laser-line z-10" style="display:none"></div>
+                        <div id="scan-preview" class="text-slate-600 text-[10px] text-center px-3">
+                            <i data-lucide="image" class="w-8 h-8 mx-auto mb-1 opacity-40"></i>
+                            Upload crop photo
+                        </div>
+                    </div>
+                    <input type="file" id="file-uploader" accept="image/*" class="hidden" onchange="runImageScan(event)">
+                    <button id="upload-photo-btn" onclick="document.getElementById('file-uploader').click()" class="upload-photo-btn w-full text-[11px] font-bold uppercase rounded-lg py-2 transition-colors tracking-wide">
+                        <i data-lucide="camera" class="w-3.5 h-3.5 mr-1.5"></i> Upload Photo
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -188,8 +190,8 @@
                     <h2 class="text-2xl font-black text-white shimmer-text">Your best route, explained simply</h2>
                     <p class="text-slate-400 text-sm mt-3 max-w-lg leading-relaxed">
                         <strong class="text-emerald-400">Step 1:</strong> find local buyers and costs.
-                        <strong class="text-indigo-400">Step 2:</strong> check quality rules.
-                        <strong class="text-violet-400">Step 3:</strong> share the result with your team.
+                        <strong class="text-indigo-400">Step 2:</strong> Vision scan grades your crop and boosts Path B.
+                        <strong class="text-violet-400">Step 3:</strong> agents remember every trade in history.
                     </p>
                     <div class="grid grid-cols-3 gap-4 mt-8 max-w-md w-full">
                         <div class="glass rounded-xl p-3 text-center"><i data-lucide="crown" class="w-5 h-5 text-amber-400 mx-auto mb-1"></i><span class="text-[10px] text-slate-400">Don Salvatore</span></div>
@@ -309,13 +311,13 @@
                 </div>
             </div>
 
-            <div class="glass rounded-2xl h-40 flex flex-col overflow-hidden shrink-0">
-                <div class="px-4 py-2 border-b border-slate-800/80 flex items-center justify-between">
+            <div class="glass rounded-2xl iq-console-panel flex flex-col overflow-hidden shrink-0">
+                <div class="panel-card-title px-4 py-2.5 border-b border-slate-800/80 flex items-center justify-between">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                         <i data-lucide="terminal" class="text-emerald-400 w-3.5 h-3.5"></i> IQ Pipeline Console
                     </span>
                 </div>
-                <div id="agent-console" class="flex-1 overflow-y-auto p-3 font-mono text-[11px] space-y-1 text-emerald-500/90">
+                <div id="agent-console" class="flex-1 overflow-y-auto p-3 font-mono text-[11px] space-y-1 text-emerald-500/90 min-h-[7.5rem]">
                     <div class="text-slate-600">System ready. Waiting for pipeline run...</div>
                 </div>
             </div>
@@ -331,7 +333,13 @@
             </div>
             <div id="advisor-messages" class="flex-1 overflow-y-auto p-4">
                 <div class="chat-bubble-ai text-xs p-3 rounded-xl text-indigo-100">
-                    Ciao, I am <strong>Don Salvatore</strong>. I am your guide. Tell me what you harvested, and I will ask Matteo for the numbers and Sofia for the quality check.
+                    Ciao compare, I am <strong>Don Salvatore</strong>. Tell me your harvest in English or Italian, even by voice. I ask Matteo for the numbers, Sofia DOP for the papers, and we <strong>remember every trade</strong> you run.
+                </div>
+                <div id="trade-memory-panel" class="mt-3 glass rounded-xl p-3 border-emerald-500/15">
+                    <p class="text-[9px] text-emerald-400 font-black uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                        <i data-lucide="brain" class="w-3 h-3"></i> Agent Memory — Trade History
+                    </p>
+                    <div id="trade-history-list" class="trade-history-list"></div>
                 </div>
             </div>
             <div class="px-4 pb-2" id="advisor-chips">
@@ -342,15 +350,29 @@
                     <button type="button" class="advisor-chip agent-query query-sofia" data-agent="sofia" data-q="Sofia, check if my crop can get quality premium and explain why in plain language.">🛡️ Sofia: Quality check</button>
                     <button type="button" class="advisor-chip agent-query query-seal" data-agent="seal" data-q="Can we issue the Golden Seal? Tell me yes or no with a short reason.">🏅 Golden Seal?</button>
                     <button type="button" class="advisor-chip agent-query query-contract" data-agent="contract" data-q="Create a friendly fair-trade contract draft using these results.">📄 Friendly contract</button>
+                    <button type="button" class="advisor-chip agent-query query-vision" data-agent="sofia" data-q="Sofia, explain what the Vision quality scan does and how it boosts profit.">📷 Vision scan</button>
+                    <button type="button" class="advisor-chip agent-query query-memory" data-agent="don" data-q="Don Salvatore, show me our trade history from agent memory.">📜 Trade history</button>
                 </div>
             </div>
             <form id="advisor-form" class="p-4 border-t border-slate-800/80">
-                <div class="flex gap-2">
-                    <input id="advisor-input" type="text" placeholder="Ask in your own words (for example: How can I earn more?)" class="flex-1 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-indigo-500/40" autocomplete="off">
+            <div class="flex gap-2">
+                    <input id="advisor-input" type="text" placeholder="Ask in English or Italian (es: Come guadagno di piu?)" class="flex-1 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-indigo-500/40" autocomplete="off">
+                    <button id="advisor-voice-btn" type="button" class="advisor-voice-btn bg-slate-900/90 hover:bg-indigo-600/30 border border-slate-700 text-slate-300 p-2 rounded-xl transition-colors" aria-label="Speak to advisor">
+                        <i data-lucide="mic" class="w-4 h-4"></i>
+                    </button>
                     <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2 rounded-xl transition-colors">
                         <i data-lucide="send" class="w-4 h-4"></i>
                     </button>
                 </div>
+                <div class="mt-2 flex items-center gap-2">
+                    <label for="advisor-language" class="text-[9px] text-slate-500 uppercase font-black tracking-widest">Voice</label>
+                    <select id="advisor-language" class="voice-language-select bg-slate-950/80 border border-slate-800 rounded-lg px-2 py-1 text-[10px] text-slate-300 outline-none">
+                        <option value="auto">Auto language</option>
+                        <option value="en-US">English</option>
+                        <option value="it-IT">Italiano</option>
+                    </select>
+                </div>
+                <p id="advisor-voice-status" class="mt-2 text-[10px] text-slate-500 hidden">Listening...</p>
             </form>
         </aside>
     </main>
