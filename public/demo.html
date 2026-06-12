@@ -249,29 +249,90 @@
         }
         #intro-video { border-radius: 16px; }
         #intro-video::-webkit-media-controls-panel { background: rgba(12,10,9,.85); }
+        .demo-mobile-bar {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            gap: 8px;
+            padding: 10px 12px;
+            background: rgba(12, 10, 9, 0.92);
+            border-bottom: 1px solid rgba(52, 211, 153, 0.25);
+            backdrop-filter: blur(12px);
+        }
+        .demo-mobile-bar button,
+        .demo-mobile-bar a {
+            flex: 1;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 12px 10px;
+            border-radius: 12px;
+        }
+        .demo-mobile-bar button {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: #0c0a09;
+        }
+        .demo-mobile-bar a {
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            color: #d6d3d1;
+            text-decoration: none;
+        }
+        .flow-map-scroll {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 12px 8px;
+        }
+        .aside-compact { display: block; }
         @media (max-width: 1024px) {
-            body { min-height: 100%; overflow: auto; }
-            .demo-shell.relative { min-height: 100vh; height: auto; display: flex; flex-direction: column; }
-            aside { height: auto !important; }
-            main { height: auto; min-height: 720px; }
+            body.h-full.overflow-hidden { height: auto; min-height: 100%; overflow: auto; }
+            .demo-shell {
+                display: flex;
+                flex-direction: column;
+                grid-template-columns: 1fr !important;
+                min-height: 100vh;
+                height: auto;
+            }
+            .demo-mobile-bar { display: flex; }
+            main { order: 1; height: auto; min-height: 0; flex: 1; }
+            aside { order: 2; height: auto !important; }
+            aside .metric-explainer,
+            aside .grid.grid-cols-3,
+            aside .space-y-3 { display: none; }
+            aside > .mb-6:first-child p.text-sm { display: none; }
+            aside h1 { font-size: 28px; }
             #story-scroll { flex: none; overflow: visible; }
             #story-board { grid-template-columns: 1fr; padding: 16px 14px 28px; }
             #story-board .step { grid-column: span 1 / span 1; }
-            .flow-map { width: calc(100% - 24px); grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
-            .flow-node { min-height: 48px; padding: 8px; }
+            .flow-map {
+                width: max(640px, 100%);
+                min-width: 640px;
+                grid-template-columns: repeat(6, minmax(88px, 1fr));
+                gap: 6px;
+                margin: 0 auto;
+            }
+            .flow-node { min-height: 52px; padding: 8px; }
             .flow-node::after { display: none; }
-            .flow-node p.text-xs { display: none; }
-            #app-frame.live-demo-frame { margin: 12px; height: 70vh; min-height: 520px; border-radius: 18px; }
+            .flow-node p.text-xs { font-size: 9px; line-height: 1.2; }
+            #flow-status { text-align: center; width: 100%; left: 0; transform: none; padding: 0 12px; }
+            #app-frame.live-demo-frame { margin: 12px auto; width: calc(100% - 24px); height: 65vh; min-height: 420px; border-radius: 18px; }
             .copilot-note { grid-template-columns: 1fr; }
+            #teleprompter { text-align: center; }
+            #script-line { margin: 0 auto; max-width: 36rem; }
+            .demo-mission { margin-left: auto; margin-right: auto; }
         }
         @media (max-width: 640px) {
             #teleprompter { padding: 14px 12px; }
             #script-line { font-size: 12px; line-height: 1.45; }
-            aside { padding: 18px; }
-            aside h1 { font-size: 34px; }
-            .demo-action-banner { width: calc(100% - 24px); font-size: 10px; }
-            .live-app-status { top: 68px; right: 10px; width: min(260px, calc(100% - 20px)); }
-            main.live-running #app-frame.live-demo-frame { margin-top: 72px; }
+            aside { padding: 18px; text-align: center; }
+            aside h1 { font-size: 26px; }
+            aside #btn-start { width: 100%; }
+            .demo-action-banner { width: calc(100% - 24px); font-size: 10px; left: 50%; transform: translateX(-50%); }
+            .live-app-status { top: 118px; right: 10px; left: 10px; width: auto; }
+            main.live-running #app-frame.live-demo-frame { margin-top: 88px; }
             .demo-mission { font-size: 11px; padding: 8px 10px; }
         }
     </style>
@@ -343,6 +404,10 @@
         </aside>
 
         <main class="relative h-full">
+            <div class="demo-mobile-bar">
+                <button type="button" id="btn-start-mobile">Start 2-Min Demo</button>
+                <a href="index.html">Open App</a>
+            </div>
             <div id="teleprompter" class="flex-shrink-0 bg-black/80 border-b border-emerald-500/30 px-6 py-4">
                 <p id="script-line" class="text-emerald-300 text-sm font-bold text-center">Ready: click Start and follow the problem → agent solution story.</p>
                 <p class="demo-mission"><strong>The problem:</strong> Sicilian smallholders sell olives and grapes to bulk silos at commodity prices, so value leaves the village. <strong>Our creative app:</strong> friendly AI agents work together — Don listens, Matteo runs Fabric IQ math, Sofia runs Vision scan + Foundry compliance, agents remember every trade, and Copilot drafts the contract.</p>
@@ -353,6 +418,7 @@
             </div>
 
             <p id="flow-status">Workflow 1/6 — Harvest enters the chain</p>
+            <div class="flow-map-scroll">
             <div id="flow-map" class="flow-map">
                 <div class="flow-node current" data-flow="0"><span class="wire-dot"></span><p class="text-[10px] text-emerald-300 font-black uppercase mt-2">Harvest</p><p class="text-xs text-stone-300">Farmer request</p></div>
                 <div class="flow-node" data-flow="1"><span class="wire-dot"></span><p class="text-[10px] text-amber-300 font-black uppercase mt-2">Don</p><p class="text-xs text-stone-300">Routes the work</p></div>
@@ -360,6 +426,7 @@
                 <div class="flow-node" data-flow="3"><span class="wire-dot"></span><p class="text-[10px] text-indigo-300 font-black uppercase mt-2">Sofia</p><p class="text-xs text-stone-300">Checks quality</p></div>
                 <div class="flow-node" data-flow="4"><span class="wire-dot"></span><p class="text-[10px] text-indigo-300 font-black uppercase mt-2">Vision</p><p class="text-xs text-stone-300">Scans crop photo</p></div>
                 <div class="flow-node" data-flow="5"><span class="wire-dot"></span><p class="text-[10px] text-violet-300 font-black uppercase mt-2">Copilot</p><p class="text-xs text-stone-300">Drafts contract</p></div>
+            </div>
             </div>
 
             <div id="story-scroll">
@@ -462,6 +529,7 @@
         let chosenVoiceURI = "auto";
 
         document.getElementById("btn-start").onclick = startDemo;
+        document.getElementById("btn-start-mobile").onclick = () => document.getElementById("btn-start").click();
         document.getElementById("btn-audio").onclick = toggleAudioNarration;
         document.getElementById("btn-replay").onclick = () => { hideFinale(); startDemo(); };
         document.getElementById("btn-close-finale").onclick = hideFinale;

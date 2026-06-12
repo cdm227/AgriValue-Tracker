@@ -12,13 +12,19 @@ If your Markdown viewer does not render video, open:
 
 [`public/media/agrivalue-iq-intro.mp4`](public/media/agrivalue-iq-intro.mp4)
 
-## Live Demo
+## Live Demo (for judges — start here)
+
+**Do not rely on the default Git clone branch.** Use these URLs directly:
 
 | Mode | URL |
 |------|-----|
 | GitHub Pages UI | [cdm227.github.io/AgriValue-Tracker](https://cdm227.github.io/AgriValue-Tracker) |
-| Judge demo with intro video | […/demo.html](https://cdm227.github.io/AgriValue-Tracker/demo.html) |
+| **2-min judge demo** (teleprompter + auto-narration) | […/demo.html](https://cdm227.github.io/AgriValue-Tracker/demo.html) |
 | Full API (Azure) | Set `AZURE_API_URL` secret → see [docs/AZURE_DEPLOY.md](docs/AZURE_DEPLOY.md) |
+
+**Source branch:** production code lives on **`PROD`**. Set GitHub **Settings → General → Default branch → PROD** so clones match Pages.
+
+**CI:** Pushes to `PROD` auto-deploy GitHub Pages (`.github/workflows/static.yml`) and Azure backend (`.github/workflows/azure-deploy.yml`).
 
 ## Quick Start
 
@@ -117,11 +123,25 @@ infra/                  # Bicep + Fabric SQL schema
 .github/workflows/      # Azure + GitHub Pages deploy
 ```
 
-## Record Your Demo Video
+## Record Your 2-Min Submission Video
 
-1. Open `/demo.html` → click **Start 2-Min Demo**
-2. Open VS Code with Copilot MCP (`.vscode/mcp.json`)
-3. Record screen — script in [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
+Full step-by-step: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
+
+### Quick checklist
+
+1. **Demo page:** [demo.html](https://cdm227.github.io/AgriValue-Tracker/demo.html) → **Start 2-Min Judge Demo** (teleprompter + narration)
+2. **Copilot MCP:** Open this repo in VS Code → Copilot Chat → `@agrivalue-iq generate_supply_contract ...` (see script)
+3. **Record:** OBS, Win+G (Xbox Game Bar), or Loom — capture demo page + VS Code split or cut
+4. **Upload:** YouTube (unlisted) or Loom → paste link at [aka.ms/agentsleague/aisf](https://aka.ms/agentsleague/aisf)
+
+### Fix default branch & auto-deploy (one-time)
+
+| Step | Where | Action |
+|------|--------|--------|
+| Default branch | GitHub → **Settings → General → Default branch** | Switch from `testingv1` to **`PROD`** |
+| Pages deploy | Push to `PROD` | Workflow `static.yml` builds & deploys `public/` |
+| Azure API | Push to `PROD` | Workflow `azure-deploy.yml` (if Azure secrets configured) |
+| Manual deploy | **Actions** → *Deploy static content to Pages* → **Run workflow** | Use if you need a deploy before the next push |
 
 
 

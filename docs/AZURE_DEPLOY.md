@@ -65,8 +65,8 @@ Create environment `azure-production` in repo Settings → Environments (optiona
 
 ## Deploy
 
-- **Backend:** Push to `main` → `.github/workflows/azure-deploy.yml` deploys full app
-- **Frontend:** Push to `main` → `.github/workflows/static.yml` deploys `public/` with injected `config.js`
+- **Backend:** Push to `PROD` → `.github/workflows/azure-deploy.yml` deploys full app
+- **Frontend:** Push to `PROD` → `.github/workflows/static.yml` deploys `public/` with injected `config.js`
 
 ## Verify
 

@@ -1,13 +1,13 @@
 # Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
 on:
-  # Deploy only when code is pushed to prod
+  # Deploy when code is pushed to PROD (production branch)
   push:
-    branches: ["prod"]
+    branches: ["PROD"]
 
-  # Validate PRs targeting prod (build only, no deploy)
+  # Validate PRs targeting PROD (build only, no deploy)
   pull_request:
-    branches: ["prod"]
+    branches: ["PROD"]
     types: [opened, synchronize, reopened]
 
   # Allows you to run this workflow manually from the Actions tab
