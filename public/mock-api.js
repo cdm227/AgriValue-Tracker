@@ -10,6 +10,7 @@ import {
   generateSupplyContract,
 } from "./js/fabric-iq-client.js";
 import { getApiBase, isStaticHost } from "./js/api-client.js";
+import { loadTradeHistory } from "./js/trade-memory.js";
 
 function mockFetch(url, options = {}) {
   const path = typeof url === "string" ? url : url.url;
@@ -131,7 +132,12 @@ function mockFetch(url, options = {}) {
 
   if (path.includes("/api/optimize") && method === "POST") {
     const body = JSON.parse(options.body);
-    const result = optimizeValueChain(body);
+    const result = optimizeValueChain({
+      crop: body.crop,
+      qtyTons: body.qtyTons,
+      isOrganic: body.isOrganic,
+      qualityMultiplier: body.qualityMultiplier || 1,
+    });
     result.iqLayers = { fabric: "in-memory", foundry: "local-rules" };
     return Promise.resolve(new Response(JSON.stringify(result), { status: 200, headers: { "Content-Type": "application/json" } }));
   }
@@ -142,15 +148,31 @@ function mockFetch(url, options = {}) {
     return Promise.resolve(new Response(JSON.stringify({ contract }), { status: 200, headers: { "Content-Type": "application/json" } }));
   }
 
+  if (path.includes("/api/trade-history")) {
+    const limit = Number(new URL(path, window.location.origin).searchParams.get("limit")) || 20;
+    return Promise.resolve(new Response(JSON.stringify({ trades: loadTradeHistory().slice(0, limit) }), { status: 200, headers: { "Content-Type": "application/json" } }));
+  }
+
   if (path.includes("/api/advisor") && method === "POST") {
     const body = JSON.parse(options.body);
     const crop = body.crop || "Olive Oil";
     const lower = (body.message || "").toLowerCase();
     const intel = getMarketIntelligence(crop);
     const opt = optimizeValueChain({ crop, qtyTons: 10, isOrganic: true });
+    const recentTrades = body.recentTrades?.length ? body.recentTrades : loadTradeHistory();
     let reply = `**Don Salvatore:** I have your ${crop} request. **Matteo** says the strongest local route is ${intel.processor} for ${intel.processedProduct}. **Sofia DOP** checks: ${intel.complianceRule} Static demo mode uses local rules; connect your own Foundry resource for live RAG.`;
 
-    if (lower.includes("matteo") || lower.includes("yield math")) {
+    if (lower.includes("trade history") || lower.includes("memory") || lower.includes("storico") || lower.includes("memoria")) {
+      if (!recentTrades.length) {
+        reply = "**Don Salvatore:** No trade memory yet, compare. Run the IQ pipeline once and I will remember it.";
+      } else {
+        const lines = recentTrades.slice(0, 5).map((t) => `• ${t.crop} ${t.qtyTons} MT → +$${Number(t.addedValue || 0).toLocaleString()}`);
+        reply = `**Don Salvatore:** Agent memory — your recent saved trades:\n${lines.join("\n")}`;
+      }
+    } else if (lower.includes("vision") || lower.includes("scan") || lower.includes("photo") || lower.includes("foto")) {
+      const vision = evaluateQuality(crop);
+      reply = `**Sofia DOP:** Foundry Vision grades ${crop} as **${vision.grade}** with a **${vision.multiplier}x** profit multiplier. ${vision.analysis} Upload a crop photo in the Vision Quality Scan panel.`;
+    } else if (lower.includes("matteo") || lower.includes("yield math")) {
       reply = `**Matteo:** ${opt.agentTrace.yieldMath.yieldRule}. Estimated output: ${opt.agentTrace.yieldMath.output.toLocaleString()} ${opt.agentTrace.yieldMath.unit}. Processing plan cost: $${opt.agentTrace.yieldMath.processingCost.toLocaleString()}.`;
     } else if (lower.includes("sofia") || lower.includes("golden seal") || lower.includes("certification")) {
       reply = `**Sofia DOP:** ${opt.agentTrace.compliance.metric}: ${opt.agentTrace.compliance.observed} against ${opt.agentTrace.compliance.threshold}. ${opt.agentTrace.compliance.rule} Golden Seal: ${opt.agentTrace.goldenSeal ? "qualified" : "needs evidence"}.`;
