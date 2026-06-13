@@ -33,7 +33,7 @@ AgriValue Tracker connects a static GitHub Pages UI to an optional Azure Node.js
 | Fabric IQ    | `lib/fabric-iq.js`, `lib/fabric-lakehouse.js` | Crop → processor graph, Path A vs B       |
 | Agent memory | `lib/agent-memory.js`                         | In-session trade history                  |
 | Work IQ      | `lib/work-iq.js`                              | Teams via Graph or webhook                |
-| MCP          | `mcp-server.js`                               | Copilot tool surface                      |
+| MCP          | `mcp-server.js`, `.vscode/mcp.json`, `.mcp.json` | Copilot tool surface (VS Code + CLI)      |
 
 ## Key flows
 
@@ -61,4 +61,5 @@ When `public/config.js` has `staticFallback: true`, the browser uses `public/moc
 - [MICROSOFT_IQ.md](MICROSOFT_IQ.md) — IQ integration detail
 - [AZURE_DEPLOY.md](AZURE_DEPLOY.md) — provisioning and env vars
 - [COPILOT.md](COPILOT.md) — Copilot development story
+- [COPILOT_CLI.md](COPILOT_CLI.md) — Copilot CLI terminal workflow
 - [adr/001-triple-iq-stack.md](adr/001-triple-iq-stack.md) — ADR: why three IQ layers

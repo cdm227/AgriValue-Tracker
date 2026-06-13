@@ -7,6 +7,8 @@
   "scripts": {
     "start": "node server.js",
     "mcp": "node mcp-server.js",
+    "mcp:cli": "node scripts/mcp-launcher.mjs",
+    "verify:mcp": "node scripts/verify-mcp.mjs",
     "agent:action": "node scripts/agent-action.mjs",
     "build:static": "node scripts/sync-static-data.js && node scripts/inject-config.js",
     "prestart": "node scripts/sync-static-data.js",

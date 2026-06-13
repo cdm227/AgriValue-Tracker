@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "agrivalue-iq": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["scripts/mcp-launcher.mjs"],
+      "env": {},
+      "tools": ["*"]
+    }
+  }
+}

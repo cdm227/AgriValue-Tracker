@@ -10,7 +10,7 @@ Sicilian value-chain optimizer for **Agents League Battle #1** (Creative Apps + 
 | IQ data      | `lib/iq-data.js`                                            | Unified Fabric / portfolio / optimize / advisor             |
 | Fabric graph | `lib/fabric-iq.js`, `lib/fabric-lakehouse.js`               | Semantic market graph (+ SQL fallback)                      |
 | Work IQ      | `lib/work-iq.js`                                            | Microsoft Graph / Teams webhooks                            |
-| MCP          | `mcp-server.js`, `.vscode/mcp.json`                         | Copilot tools in VS Code                                    |
+| MCP          | `mcp-server.js`, `.vscode/mcp.json`, `.mcp.json`              | Copilot tools in VS Code + Copilot CLI                        |
 | UI           | `public/index.html`, `public/demo.html`, `public/js/app.js` | Terminal + judge teleprompter                               |
 | Static sync  | `scripts/sync-static-data.js`                               | Copies `lib/fabric-iq.js` → `public/js/fabric-iq-client.js` |
 
@@ -22,6 +22,7 @@ Sicilian value-chain optimizer for **Agents League Battle #1** (Creative Apps + 
 npm install
 npm start                    # http://localhost:3000
 npm run mcp                  # MCP server (stdio)
+npm run verify:mcp           # smoke-test MCP startup
 npm test                     # node:test suite
 npm run lint                 # ESLint
 npm run agent:action -- help # deterministic demo actions
@@ -33,6 +34,7 @@ npm run build:static         # Pages build (sync + config inject)
 - [docs/architecture.md](docs/architecture.md) — system overview
 - [docs/MICROSOFT_IQ.md](docs/MICROSOFT_IQ.md) — Fabric / Foundry / Work IQ
 - [docs/COPILOT.md](docs/COPILOT.md) — Copilot + MCP usage
+- [docs/COPILOT_CLI.md](docs/COPILOT_CLI.md) — Copilot CLI + `.mcp.json`
 - [docs/AZURE_DEPLOY.md](docs/AZURE_DEPLOY.md) — Azure App Service + Pages
 - [.agents/skills/agrivalue-iq-operator/SKILL.md](.agents/skills/agrivalue-iq-operator/SKILL.md) — operator skill
 

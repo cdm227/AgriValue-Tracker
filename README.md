@@ -37,11 +37,12 @@ npm install
 cp .env.example .env   # optional: Azure, Fabric, Graph credentials
 npm start              # http://localhost:3000
 npm run mcp            # Copilot MCP server for VS Code
+npm run verify:mcp     # smoke-test MCP (no CLI required)
 npm test               # node:test suite (Fabric IQ + agent memory)
 npm run lint           # ESLint
 ```
 
-**AI / agent context:** [AGENTS.md](AGENTS.md) · [docs/architecture.md](docs/architecture.md) · [.github/copilot-instructions.md](.github/copilot-instructions.md)
+**AI / agent context:** [AGENTS.md](AGENTS.md) · [docs/architecture.md](docs/architecture.md) · [docs/COPILOT_CLI.md](docs/COPILOT_CLI.md) · [.github/copilot-instructions.md](.github/copilot-instructions.md)
 
 ### Test Locally Or In Codespaces
 
@@ -102,7 +103,7 @@ npm run agent:action -- contract --crop "Olive Oil" --qty 15 --buyer "Cooperativ
 
 | Requirement           | Status                                  | Documentation                                |
 | --------------------- | --------------------------------------- | -------------------------------------------- |
-| GitHub Copilot + MCP  | Done                                    | [docs/COPILOT.md](docs/COPILOT.md)           |
+| GitHub Copilot + MCP | Done | [docs/COPILOT.md](docs/COPILOT.md) · [docs/COPILOT_CLI.md](docs/COPILOT_CLI.md) |
 | Microsoft IQ (×3)     | Demo + docs                             | [docs/MICROSOFT_IQ.md](docs/MICROSOFT_IQ.md) |
 | Azure deployment      | Workflow ready                          | [docs/AZURE_DEPLOY.md](docs/AZURE_DEPLOY.md) |
 | Submission demo video | [YouTube](https://youtu.be/o8KqG8foLfM) | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)   |
