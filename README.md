@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/cdm227-agrivalue-tracker-badge.png)](https://mseep.ai/app/cdm227-agrivalue-tracker)
+
 # 🌾 AgriValue Tracker
 
 **Battle #1: Creative Apps with GitHub Copilot** — AI Agents League
