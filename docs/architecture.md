@@ -24,15 +24,15 @@ AgriValue Tracker connects a static GitHub Pages UI to an optional Azure Node.js
 
 ## Layers
 
-| Layer        | Module                                        | Responsibility                            |
-| ------------ | --------------------------------------------- | ----------------------------------------- |
-| Presentation | `public/index.html`, `public/js/app.js`       | Terminal UI, charts, advisor, vision scan |
-| Judge demo   | `public/demo.html`                            | 2-min teleprompter + embedded live app    |
-| API          | `server.js`                                   | REST routes, CORS, Foundry agent polling  |
-| Domain       | `lib/iq-data.js`                              | Portfolio, optimize, advisor, contracts   |
-| Fabric IQ    | `lib/fabric-iq.js`, `lib/fabric-lakehouse.js` | Crop → processor graph, Path A vs B       |
-| Agent memory | `lib/agent-memory.js`                         | In-session trade history                  |
-| Work IQ      | `lib/work-iq.js`                              | Teams via Graph or webhook                |
+| Layer        | Module                                           | Responsibility                            |
+| ------------ | ------------------------------------------------ | ----------------------------------------- |
+| Presentation | `public/index.html`, `public/js/app.js`          | Terminal UI, charts, advisor, vision scan |
+| Judge demo   | `public/demo.html`                               | 2-min teleprompter + embedded live app    |
+| API          | `server.js`                                      | REST routes, CORS, Foundry agent polling  |
+| Domain       | `lib/iq-data.js`                                 | Portfolio, optimize, advisor, contracts   |
+| Fabric IQ    | `lib/fabric-iq.js`, `lib/fabric-lakehouse.js`    | Crop → processor graph, Path A vs B       |
+| Agent memory | `lib/agent-memory.js`                            | In-session trade history                  |
+| Work IQ      | `lib/work-iq.js`                                 | Teams via Graph or webhook                |
 | MCP          | `mcp-server.js`, `.vscode/mcp.json`, `.mcp.json` | Copilot tool surface (VS Code + CLI)      |
 
 ## Key flows

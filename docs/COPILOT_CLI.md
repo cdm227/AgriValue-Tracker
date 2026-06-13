@@ -2,11 +2,11 @@
 
 Use **GitHub Copilot CLI** in the terminal with the same `agrivalue-iq` MCP server as VS Code — no duplicate logic, same three tools:
 
-| Tool | Purpose |
-|------|---------|
-| `get_market_intelligence` | Fabric IQ pricing + compliance |
-| `generate_supply_contract` | Fair-Trade contract draft |
-| `evaluate_crop_quality` | Vision grade + profit multiplier |
+| Tool                       | Purpose                          |
+| -------------------------- | -------------------------------- |
+| `get_market_intelligence`  | Fabric IQ pricing + compliance   |
+| `generate_supply_contract` | Fair-Trade contract draft        |
+| `evaluate_crop_quality`    | Vision grade + profit multiplier |
 
 ## Prerequisites
 
@@ -143,10 +143,10 @@ Same MCP tools, terminal instead of IDE.
 
 ### VS Code vs CLI
 
-| Surface | Config file | When to use |
-|---------|-------------|-------------|
-| **VS Code** | `.vscode/mcp.json` | IDE workflow, demo video cut to Copilot Chat |
-| **Copilot CLI** | `.mcp.json` (repo root) | Terminal, automation, headless dev |
+| Surface         | Config file             | When to use                                  |
+| --------------- | ----------------------- | -------------------------------------------- |
+| **VS Code**     | `.vscode/mcp.json`      | IDE workflow, demo video cut to Copilot Chat |
+| **Copilot CLI** | `.mcp.json` (repo root) | Terminal, automation, headless dev           |
 
 Both call **`scripts/mcp-launcher.mjs`** → **`mcp-server.js`** → **`lib/iq-data.js`**.
 
@@ -176,13 +176,13 @@ Add a force majeure clause for Sicilian harvest weather.
 
 ### MCP management commands
 
-| Command | Action |
-|---------|--------|
-| `/mcp show` | List all MCP servers |
-| `/mcp show agrivalue-iq` | Tools for this repo |
-| `/mcp reload` | Reload after config change |
-| `/mcp disable agrivalue-iq` | Turn off for session |
-| `/mcp enable agrivalue-iq` | Turn back on |
+| Command                     | Action                     |
+| --------------------------- | -------------------------- |
+| `/mcp show`                 | List all MCP servers       |
+| `/mcp show agrivalue-iq`    | Tools for this repo        |
+| `/mcp reload`               | Reload after config change |
+| `/mcp disable agrivalue-iq` | Turn off for session       |
+| `/mcp enable agrivalue-iq`  | Turn back on               |
 
 ### Troubleshooting
 
@@ -231,12 +231,12 @@ Add a force majeure clause for Sicilian harvest weather.
 
 7. **Fabric SQL in `.env`** — if `FABRIC_SQL_*` is set but unreachable, the server still starts (sync runs in background). Remove or fix `.env` if startup is slow.
 
-| Problem | Fix |
-|---------|-----|
-| `agrivalue-iq` not in `/mcp show` | Run CLI from repo root; `ls -la .mcp.json` |
-| MCP server fails to start | `npm run verify:mcp` and `npm run mcp:cli` |
-| Wrong crop / empty tools | Crops: Olive Oil, Grapes, Wheat, Coffee, Milk |
-| Plain `ls` hides config | Use `ls -a` to see `.mcp.json`, `.gitattributes`, etc. |
+| Problem                           | Fix                                                    |
+| --------------------------------- | ------------------------------------------------------ |
+| `agrivalue-iq` not in `/mcp show` | Run CLI from repo root; `ls -la .mcp.json`             |
+| MCP server fails to start         | `npm run verify:mcp` and `npm run mcp:cli`             |
+| Wrong crop / empty tools          | Crops: Olive Oil, Grapes, Wheat, Coffee, Milk          |
+| Plain `ls` hides config           | Use `ls -a` to see `.mcp.json`, `.gitattributes`, etc. |
 
 ### No secrets required
 

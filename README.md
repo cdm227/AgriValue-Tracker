@@ -101,12 +101,12 @@ npm run agent:action -- contract --crop "Olive Oil" --qty 15 --buyer "Cooperativ
 
 ## Challenge Requirements
 
-| Requirement           | Status                                  | Documentation                                |
-| --------------------- | --------------------------------------- | -------------------------------------------- |
-| GitHub Copilot + MCP | Done | [docs/COPILOT.md](docs/COPILOT.md) · [docs/COPILOT_CLI.md](docs/COPILOT_CLI.md) |
-| Microsoft IQ (×3)     | Demo + docs                             | [docs/MICROSOFT_IQ.md](docs/MICROSOFT_IQ.md) |
-| Azure deployment      | Workflow ready                          | [docs/AZURE_DEPLOY.md](docs/AZURE_DEPLOY.md) |
-| Submission demo video | [YouTube](https://youtu.be/o8KqG8foLfM) | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)   |
+| Requirement           | Status                                  | Documentation                                                                   |
+| --------------------- | --------------------------------------- | ------------------------------------------------------------------------------- |
+| GitHub Copilot + MCP  | Done                                    | [docs/COPILOT.md](docs/COPILOT.md) · [docs/COPILOT_CLI.md](docs/COPILOT_CLI.md) |
+| Microsoft IQ (×3)     | Demo + docs                             | [docs/MICROSOFT_IQ.md](docs/MICROSOFT_IQ.md)                                    |
+| Azure deployment      | Workflow ready                          | [docs/AZURE_DEPLOY.md](docs/AZURE_DEPLOY.md)                                    |
+| Submission demo video | [YouTube](https://youtu.be/o8KqG8foLfM) | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)                                      |
 
 ## UI Features (v3)
 

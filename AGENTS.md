@@ -10,7 +10,7 @@ Sicilian value-chain optimizer for **Agents League Battle #1** (Creative Apps + 
 | IQ data      | `lib/iq-data.js`                                            | Unified Fabric / portfolio / optimize / advisor             |
 | Fabric graph | `lib/fabric-iq.js`, `lib/fabric-lakehouse.js`               | Semantic market graph (+ SQL fallback)                      |
 | Work IQ      | `lib/work-iq.js`                                            | Microsoft Graph / Teams webhooks                            |
-| MCP          | `mcp-server.js`, `.vscode/mcp.json`, `.mcp.json`              | Copilot tools in VS Code + Copilot CLI                        |
+| MCP          | `mcp-server.js`, `.vscode/mcp.json`, `.mcp.json`            | Copilot tools in VS Code + Copilot CLI                      |
 | UI           | `public/index.html`, `public/demo.html`, `public/js/app.js` | Terminal + judge teleprompter                               |
 | Static sync  | `scripts/sync-static-data.js`                               | Copies `lib/fabric-iq.js` → `public/js/fabric-iq-client.js` |
 
