@@ -78,7 +78,7 @@ function setupIntro() {
 }
 
 function setupWelcomeHero() {
-  const btn = document.getElementById("welcome-hero-dettagli");
+  const btn = document.getElementById("welcome-hero-details-btn");
   const panel = document.getElementById("welcome-hero-details");
   if (!btn || !panel) return;
   btn.addEventListener("click", () => {
@@ -86,7 +86,7 @@ function setupWelcomeHero() {
     panel.classList.toggle("hidden", !open);
     panel.classList.toggle("is-open", open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
-    btn.textContent = open ? "Nascondi" : "Dettagli";
+    btn.textContent = open ? "Hide" : "Details";
     if (open) panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
   });
 }

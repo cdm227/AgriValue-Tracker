@@ -31,33 +31,33 @@ Note the `apiUrl` output (e.g. `https://agrivalue-iq-prod.azurewebsites.net`).
 
 In Azure Portal → App Service → Configuration → Application settings:
 
-| Setting | Purpose |
-|---------|---------|
-| `FOUNDRY_OPENAI_BASE_URL` | Foundry OpenAI v1 base URL, e.g. `https://...services.ai.azure.com/openai/v1` |
-| `FOUNDRY_MODEL_DEPLOYMENT` | Model deployment name, e.g. `gpt-4o` |
-| `FOUNDRY_RESPONSES_ENDPOINT` | Foundry project agent Responses endpoint |
-| `FOUNDRY_API_KEY` | Optional key. If omitted, App Service uses managed identity / DefaultAzureCredential |
-| `AZURE_AI_AGENT_ID` | Legacy Azure OpenAI agent ID fallback |
-| `AZURE_OPENAI_ENDPOINT` | Legacy Azure OpenAI endpoint fallback |
-| `AZURE_OPENAI_API_KEY` | Legacy Azure OpenAI API key fallback |
-| `FABRIC_SQL_SERVER` | Fabric warehouse SQL endpoint |
-| `FABRIC_SQL_DATABASE` | Database name |
-| `GRAPH_TENANT_ID` | Work IQ — Entra tenant |
-| `GRAPH_CLIENT_ID` | App registration client ID |
-| `GRAPH_CLIENT_SECRET` | Client secret |
-| `TEAMS_TEAM_ID` | Teams team ID |
-| `TEAMS_CHANNEL_ID` | Channel ID |
-| `CORS_ORIGINS` | `https://cdm227.github.io` |
+| Setting                      | Purpose                                                                              |
+| ---------------------------- | ------------------------------------------------------------------------------------ |
+| `FOUNDRY_OPENAI_BASE_URL`    | Foundry OpenAI v1 base URL, e.g. `https://...services.ai.azure.com/openai/v1`        |
+| `FOUNDRY_MODEL_DEPLOYMENT`   | Model deployment name, e.g. `gpt-4o`                                                 |
+| `FOUNDRY_RESPONSES_ENDPOINT` | Foundry project agent Responses endpoint                                             |
+| `FOUNDRY_API_KEY`            | Optional key. If omitted, App Service uses managed identity / DefaultAzureCredential |
+| `AZURE_AI_AGENT_ID`          | Legacy Azure OpenAI agent ID fallback                                                |
+| `AZURE_OPENAI_ENDPOINT`      | Legacy Azure OpenAI endpoint fallback                                                |
+| `AZURE_OPENAI_API_KEY`       | Legacy Azure OpenAI API key fallback                                                 |
+| `FABRIC_SQL_SERVER`          | Fabric warehouse SQL endpoint                                                        |
+| `FABRIC_SQL_DATABASE`        | Database name                                                                        |
+| `GRAPH_TENANT_ID`            | Work IQ — Entra tenant                                                               |
+| `GRAPH_CLIENT_ID`            | App registration client ID                                                           |
+| `GRAPH_CLIENT_SECRET`        | Client secret                                                                        |
+| `TEAMS_TEAM_ID`              | Teams team ID                                                                        |
+| `TEAMS_CHANNEL_ID`           | Channel ID                                                                           |
+| `CORS_ORIGINS`               | `https://cdm227.github.io`                                                           |
 
 ### 3. GitHub Secrets
 
 Add these repository secrets:
 
-| Secret | Value |
-|--------|-------|
-| `AZURE_WEBAPP_NAME` | App name from Bicep (e.g. `agrivalue-iq-prod`) |
+| Secret                         | Value                                            |
+| ------------------------------ | ------------------------------------------------ |
+| `AZURE_WEBAPP_NAME`            | App name from Bicep (e.g. `agrivalue-iq-prod`)   |
 | `AZURE_WEBAPP_PUBLISH_PROFILE` | Download from Azure Portal → Get publish profile |
-| `AZURE_API_URL` | `https://agrivalue-iq-prod.azurewebsites.net` |
+| `AZURE_API_URL`                | `https://agrivalue-iq-prod.azurewebsites.net`    |
 
 ### 4. Enable GitHub Environments
 

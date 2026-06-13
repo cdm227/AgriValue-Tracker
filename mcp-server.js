@@ -23,7 +23,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
       inputSchema: {
         type: "object",
         properties: {
-          crop: { type: "string", enum: CROP_NAMES, description: "Sicilian agricultural commodity" },
+          crop: {
+            type: "string",
+            enum: CROP_NAMES,
+            description: "Sicilian agricultural commodity",
+          },
         },
         required: ["crop"],
       },
@@ -38,7 +42,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           crop: { type: "string", enum: CROP_NAMES },
           qtyTons: { type: "number", description: "Quantity in metric tons" },
           buyer: { type: "string", description: "Seller/cooperative name" },
-          isOrganic: { type: "boolean", description: "Whether DOP/DOC or organic certification applies" },
+          isOrganic: {
+            type: "boolean",
+            description: "Whether DOP/DOC or organic certification applies",
+          },
         },
         required: ["crop", "qtyTons"],
       },
@@ -82,10 +89,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const result = evaluateQuality(args?.crop);
     if (!result) throw new Error(`Unknown crop: ${args?.crop}`);
     return {
-      content: [{
-        type: "text",
-        text: `Grade: ${result.grade}\nMultiplier: ${result.multiplier}x\nAnalysis: ${result.analysis}`,
-      }],
+      content: [
+        {
+          type: "text",
+          text: `Grade: ${result.grade}\nMultiplier: ${result.multiplier}x\nAnalysis: ${result.analysis}`,
+        },
+      ],
     };
   }
 

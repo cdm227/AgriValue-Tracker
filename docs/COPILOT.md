@@ -35,11 +35,11 @@ functions exportable to both Express and MCP.
 
 Copilot helped implement the Model Context Protocol server exposing three tools:
 
-| Tool | Purpose |
-|------|---------|
-| `get_market_intelligence` | Grounded pricing and compliance for a crop |
-| `generate_supply_contract` | Draft Fair-Trade supply agreements |
-| `evaluate_crop_quality` | Quality grade and profit multiplier |
+| Tool                       | Purpose                                    |
+| -------------------------- | ------------------------------------------ |
+| `get_market_intelligence`  | Grounded pricing and compliance for a crop |
+| `generate_supply_contract` | Draft Fair-Trade supply agreements         |
+| `evaluate_crop_quality`    | Quality grade and profit multiplier        |
 
 **Example Copilot Chat prompt (with MCP enabled):**
 
@@ -89,14 +89,14 @@ and update the MCP enum in mcp-server.js
 
 ## What Was Built Manually vs. Copilot-Assisted
 
-| Component | Copilot role |
-|-----------|-------------|
-| Azure Foundry agent integration | Scaffolding + API version headers |
-| Fabric IQ ontology | Data structure + helper functions |
-| MCP tool schemas | JSON Schema definitions |
-| UI copy and styling | Tailwind classes + animation CSS |
-| Security (Key Vault, .env) | Pattern suggestions, manual review |
-| Challenge documentation | Structure outline, manual editing |
+| Component                       | Copilot role                       |
+| ------------------------------- | ---------------------------------- |
+| Azure Foundry agent integration | Scaffolding + API version headers  |
+| Fabric IQ ontology              | Data structure + helper functions  |
+| MCP tool schemas                | JSON Schema definitions            |
+| UI copy and styling             | Tailwind classes + animation CSS   |
+| Security (Key Vault, .env)      | Pattern suggestions, manual review |
+| Challenge documentation         | Structure outline, manual editing  |
 
 ## Security Note
 

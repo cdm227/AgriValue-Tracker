@@ -57,7 +57,7 @@
         .demo-hero-scrim {
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, 0.28);
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0.52) 100%);
             pointer-events: none;
         }
         .demo-hero-content {
@@ -89,12 +89,12 @@
         .demo-hero-lead {
             font-size: clamp(.8rem, 2.8vw, .9rem);
             line-height: 1.5;
-            color: #f5f5f4;
+            color: #f1f5f9;
             max-width: 52ch;
-            text-shadow: 0 1px 10px rgba(0,0,0,.4);
+            text-shadow: 0 1px 12px rgba(0,0,0,.5);
         }
         /* APCA/WCAG ≥ 5.48:1 — #0c0a09 on #f8fafc ≈ 19:1 */
-        .demo-hero-btn-dettagli {
+        .demo-hero-btn-details {
             margin-top: 6px;
             border: 2px solid #f8fafc;
             border-radius: 12px;
@@ -108,12 +108,12 @@
             box-shadow: 0 8px 24px rgba(0,0,0,.35);
             transition: background .2s ease, color .2s ease, transform .15s ease;
         }
-        .demo-hero-btn-dettagli:hover {
+        .demo-hero-btn-details:hover {
             background: #ffffff;
             color: #052e16;
             transform: translateY(-1px);
         }
-        .demo-hero-btn-dettagli:focus-visible {
+        .demo-hero-btn-details:focus-visible {
             outline: 3px solid #6ee7b7;
             outline-offset: 2px;
         }
@@ -415,7 +415,7 @@
             aside { order: 2; height: auto !important; max-height: 42vh; overflow-y: auto; flex-shrink: 0; }
             .demo-hero { min-height: clamp(200px, 32vh, 280px); }
             .demo-hero-content { align-items: stretch; }
-            .demo-hero-btn-dettagli { width: 100%; text-align: center; }
+            .demo-hero-btn-details { width: 100%; text-align: center; }
             aside .metric-explainer,
             aside .grid.grid-cols-3,
             aside .space-y-3 { display: none; }
@@ -556,7 +556,7 @@
                             <p class="demo-hero-eyebrow">Battle #1 · Intro</p>
                             <h2 class="demo-hero-title">From raw harvest to certified value.</h2>
                             <p class="demo-hero-lead">Don Salvatore, Matteo, and Sofia turn a silo sale into local DOP value — then Copilot drafts the contract.</p>
-                            <button type="button" id="btn-hero-dettagli" class="demo-hero-btn-dettagli" aria-expanded="false" aria-controls="hero-details">Dettagli</button>
+                            <button type="button" id="btn-hero-details" class="demo-hero-btn-details" aria-expanded="false" aria-controls="hero-details">Details</button>
                         </div>
                     </div>
                     <div id="hero-details" class="demo-hero-details hidden">
@@ -652,7 +652,7 @@
 
         document.getElementById("btn-start").onclick = startDemo;
         document.getElementById("btn-start-mobile").onclick = () => document.getElementById("btn-start").click();
-        document.getElementById("btn-hero-dettagli").onclick = toggleHeroDetails;
+        document.getElementById("btn-hero-details").onclick = toggleHeroDetails;
         document.getElementById("btn-audio").onclick = toggleAudioNarration;
         document.getElementById("btn-replay").onclick = () => { hideFinale(); startDemo(); };
         document.getElementById("btn-close-finale").onclick = hideFinale;
@@ -832,12 +832,12 @@
 
         function toggleHeroDetails() {
             const panel = document.getElementById("hero-details");
-            const btn = document.getElementById("btn-hero-dettagli");
+            const btn = document.getElementById("btn-hero-details");
             const open = !panel.classList.contains("is-open");
             panel.classList.toggle("hidden", !open);
             panel.classList.toggle("is-open", open);
             btn.setAttribute("aria-expanded", open ? "true" : "false");
-            btn.textContent = open ? "Nascondi video" : "Dettagli";
+            btn.textContent = open ? "Hide video" : "Details";
             if (open) {
                 panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
                 playIntroVideo();
@@ -847,13 +847,13 @@
         function playIntroVideo() {
             const video = document.getElementById("intro-video");
             const panel = document.getElementById("hero-details");
-            const btn = document.getElementById("btn-hero-dettagli");
+            const btn = document.getElementById("btn-hero-details");
             if (!video) return;
             if (panel && !panel.classList.contains("is-open")) {
                 panel.classList.remove("hidden");
                 panel.classList.add("is-open");
                 btn?.setAttribute("aria-expanded", "true");
-                if (btn) btn.textContent = "Nascondi video";
+                if (btn) btn.textContent = "Hide video";
             }
             video.muted = true;
             video.currentTime = 0;

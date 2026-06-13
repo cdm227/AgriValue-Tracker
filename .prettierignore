@@ -1,0 +1,7 @@
+node_modules
+public/js/fabric-iq-client.js
+public/config.js
+public/demo.html
+public/index.html
+public/css/app.css
+.agents/skills/higgsfield-generate

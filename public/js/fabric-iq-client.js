@@ -62,10 +62,14 @@ export const fabricIQ = {
     { name: "Highland Cheese Plant", inputs: "Milk", costs: 250, location: "Enna" },
   ],
   complianceRules: {
-    "Olive Oil": "Must meet EU DOP Extra Virgin criteria: acidity ≤ 0.8%, peroxide ≤ 20 mEq/kg. Premium bonus: +$450/ton when USDA Organic certified.",
-    Grapes: "DOC Sicilia appellation requires 85% Nero d'Avola varietal. Premium bonus: +$300/ton for biodynamic certification.",
-    Wheat: "Must be milled in a certified organic facility (USDA-ORGANIC-CLASS1). Premium bonus: +$45/ton.",
-    Coffee: "Ethically sourced under FLO-CERT-2026 Fair Trade guidelines. Premium bonus: +$250/ton.",
+    "Olive Oil":
+      "Must meet EU DOP Extra Virgin criteria: acidity ≤ 0.8%, peroxide ≤ 20 mEq/kg. Premium bonus: +$450/ton when USDA Organic certified.",
+    Grapes:
+      "DOC Sicilia appellation requires 85% Nero d'Avola varietal. Premium bonus: +$300/ton for biodynamic certification.",
+    Wheat:
+      "Must be milled in a certified organic facility (USDA-ORGANIC-CLASS1). Premium bonus: +$45/ton.",
+    Coffee:
+      "Ethically sourced under FLO-CERT-2026 Fair Trade guidelines. Premium bonus: +$250/ton.",
     Milk: "Pasture-raised grass-fed standards required for artisanal cheese route. Premium bonus: +$90/ton.",
   },
   organicBonuses: { "Olive Oil": 450, Grapes: 300, Wheat: 45, Coffee: 250, Milk: 90 },
