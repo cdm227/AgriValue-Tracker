@@ -8,8 +8,9 @@ Read [AGENTS.md](../AGENTS.md) and [docs/architecture.md](../docs/architecture.m
 
 ## MCP
 
-- Server: `mcp-server.js` — registered in `.vscode/mcp.json`
+- Server: `mcp-server.js` — VS Code: `.vscode/mcp.json` · CLI: `.mcp.json`
 - Invoke in Copilot Chat: `@agrivalue-iq get_market_intelligence crop="Olive Oil"`
+- Copilot CLI: run `copilot` from repo root → `/mcp show agrivalue-iq` — see [docs/COPILOT_CLI.md](../docs/COPILOT_CLI.md)
 - Tools: `get_market_intelligence`, `generate_supply_contract`, `evaluate_crop_quality`
 
 ## Code patterns

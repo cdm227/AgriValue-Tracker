@@ -1,13 +1,17 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
+import { chdir } from "node:process";
 import {
   CROP_NAMES,
   getMarketIntelligence,
   generateSupplyContract,
   evaluateQuality,
-  syncFabricGraph,
-} from "./lib/iq-data.js";
+} from "./lib/fabric-iq.js";
+
+chdir(dirname(fileURLToPath(import.meta.url)));
 
 const server = new Server(
   { name: "agrivalue-iq-mcp", version: "1.1.0" },
@@ -102,10 +106,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 });
 
 async function main() {
-  await syncFabricGraph(true);
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("AgriValue MCP Server running on stdio (Fabric IQ synced)");
+  console.error("AgriValue MCP Server running on stdio");
 }
 
 main().catch(console.error);

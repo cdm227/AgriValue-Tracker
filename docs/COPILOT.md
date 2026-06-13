@@ -69,6 +69,17 @@ When the market chart threw `getElementById('trendChart')` errors, Copilot Chat 
 3. Run `npm install` then verify: `npm run mcp` (should log "running on stdio")
 4. In Copilot Chat, reference tools with `@agrivalue-iq`
 
+## Copilot CLI (terminal)
+
+Same MCP server works in **GitHub Copilot CLI** via repo-root [`.mcp.json`](../.mcp.json).
+
+```bash
+npm run verify:mcp    # smoke test before push
+copilot               # from repo root → /mcp show agrivalue-iq
+```
+
+Full setup, test steps, and example prompts: **[docs/COPILOT_CLI.md](COPILOT_CLI.md)**
+
 ## Suggested Copilot Workflows for Judges
 
 ### Write a contract from live optimization results
