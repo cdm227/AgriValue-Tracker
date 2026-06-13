@@ -12,10 +12,10 @@ Use this script for your **Agents League submission video**. It matches the live
 
 ## Layout (recommended)
 
-| Window | Content |
-|--------|---------|
-| Primary | `demo.html` → click **Start 2-Min Judge Demo** |
-| Secondary (split or cut) | VS Code Copilot Chat with `@agrivalue-iq` |
+| Window                   | Content                                        |
+| ------------------------ | ---------------------------------------------- |
+| Primary                  | `demo.html` → click **Start 2-Min Judge Demo** |
+| Secondary (split or cut) | VS Code Copilot Chat with `@agrivalue-iq`      |
 
 ## Teleprompter flow (~128 seconds)
 
@@ -99,4 +99,4 @@ If you prefer full manual control:
 2. Upload to YouTube (unlisted) or Loom
 3. Paste the link in the [Agents League portal](https://aka.ms/agentsleague/aisf) with your repo URL
 
-**Repo URL for judges:** use the README live links — default branch should be `PROD`, not `testingv1`.
+**Repo URL for judges:** https://github.com/cdm227/AgriValue-Tracker (`PROD` default branch).

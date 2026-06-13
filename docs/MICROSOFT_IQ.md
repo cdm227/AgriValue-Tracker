@@ -22,14 +22,15 @@ GitHub Pages UI ──► Azure App Service API
 
 **Implementation:** `lib/fabric-lakehouse.js` + `lib/iq-data.js`
 
-| Mode | Source | When |
-|------|--------|------|
-| Live | Microsoft Fabric Warehouse SQL | `FABRIC_SQL_SERVER` configured |
-| Fallback | In-memory ontology | Default / connection failure |
+| Mode     | Source                         | When                           |
+| -------- | ------------------------------ | ------------------------------ |
+| Live     | Microsoft Fabric Warehouse SQL | `FABRIC_SQL_SERVER` configured |
+| Fallback | In-memory ontology             | Default / connection failure   |
 
 **Lakehouse setup:** Run `infra/fabric-schema.sql` in your Fabric SQL endpoint.
 
 **Capabilities:**
+
 - Crop → processor → certification relationships
 - Price history and forecast series
 - Value-chain optimization (Path A vs Path B)
@@ -70,12 +71,13 @@ AZURE_OPENAI_API_KEY=...
 
 **Implementation:** `lib/work-iq.js`
 
-| Channel | Config |
-|---------|--------|
-| Microsoft Graph | `GRAPH_TENANT_ID`, `GRAPH_CLIENT_ID`, `GRAPH_CLIENT_SECRET`, `TEAMS_TEAM_ID`, `TEAMS_CHANNEL_ID` |
-| Webhook fallback | `TEAMS_WEBHOOK_URL` |
+| Channel          | Config                                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------ |
+| Microsoft Graph  | `GRAPH_TENANT_ID`, `GRAPH_CLIENT_ID`, `GRAPH_CLIENT_SECRET`, `TEAMS_TEAM_ID`, `TEAMS_CHANNEL_ID` |
+| Webhook fallback | `TEAMS_WEBHOOK_URL`                                                                              |
 
 **Triggers:**
+
 - Auto on `/api/optimize` when Work IQ active
 - Manual **Teams Alert** button in UI
 - On contract export via `/api/generate-contract`
@@ -85,6 +87,7 @@ AZURE_OPENAI_API_KEY=...
 ## MCP Bridge
 
 `mcp-server.js` exposes IQ data to GitHub Copilot:
+
 - `get_market_intelligence`
 - `generate_supply_contract`
 - `evaluate_crop_quality`

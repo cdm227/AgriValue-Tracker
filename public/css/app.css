@@ -33,7 +33,7 @@ body.h-full {
 .welcome-hero-scrim {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.28);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0.52) 100%);
   pointer-events: none;
 }
 
@@ -63,11 +63,19 @@ body.h-full {
   font-weight: 800;
   line-height: 1.15;
   color: #ffffff;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
   max-width: 22ch;
 }
 
-.welcome-hero-btn-dettagli {
+.welcome-hero-lead {
+  font-size: clamp(0.78rem, 2.6vw, 0.88rem);
+  line-height: 1.45;
+  color: #f1f5f9;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+  max-width: 36ch;
+}
+
+.welcome-hero-btn-details {
   margin-top: 4px;
   border: 2px solid #f8fafc;
   border-radius: 10px;
@@ -82,13 +90,13 @@ body.h-full {
   transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
 }
 
-.welcome-hero-btn-dettagli:hover {
+.welcome-hero-btn-details:hover {
   background: #ffffff;
   color: #052e16;
   transform: translateY(-1px);
 }
 
-.welcome-hero-btn-dettagli:focus-visible {
+.welcome-hero-btn-details:focus-visible {
   outline: 3px solid #6ee7b7;
   outline-offset: 2px;
 }
@@ -98,7 +106,18 @@ body.h-full {
   padding: 14px 16px;
   border-radius: 14px;
   border: 1px solid rgba(52, 211, 153, 0.22);
-  background: rgba(2, 6, 23, 0.55);
+  background: rgba(2, 6, 23, 0.85);
+}
+
+.welcome-hero-details-copy {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  text-align: left;
+  color: #e2e8f0;
+}
+
+.welcome-hero-summary {
+  color: #cbd5e1;
 }
 
 .welcome-hero-details.is-open {
@@ -591,6 +610,20 @@ body[data-theme="light"] .upload-photo-btn:hover {
 .query-seal { color: #fcd34d; border-color: rgba(252, 211, 77, 0.24); background: rgba(252, 211, 77, 0.08); }
 .query-contract { color: #c4b5fd; border-color: rgba(196, 181, 253, 0.22); background: rgba(196, 181, 253, 0.07); }
 
+.intro-lead {
+  color: #e2e8f0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+#intro-skip {
+  color: #94a3b8;
+}
+
+#intro-skip:hover {
+  color: #e2e8f0;
+}
+
 .intro-overlay {
   align-items: flex-start;
   justify-content: center;
@@ -897,7 +930,7 @@ body[data-theme="light"] .upload-photo-btn:hover {
     align-items: stretch;
   }
 
-  .welcome-hero-btn-dettagli {
+  .welcome-hero-btn-details {
     width: 100%;
     text-align: center;
   }

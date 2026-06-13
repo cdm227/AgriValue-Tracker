@@ -4,12 +4,12 @@ on:
   push:
     branches: [PROD]
     paths:
-      - 'server.js'
-      - 'lib/**'
-      - 'mcp-server.js'
-      - 'package.json'
-      - 'public/**'
-      - '.github/workflows/azure-deploy.yml'
+      - "server.js"
+      - "lib/**"
+      - "mcp-server.js"
+      - "package.json"
+      - "public/**"
+      - ".github/workflows/azure-deploy.yml"
   workflow_dispatch:
 
 permissions:
@@ -24,7 +24,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
           cache: npm
 
       - run: npm ci

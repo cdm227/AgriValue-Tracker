@@ -9,7 +9,19 @@
     "mcp": "node mcp-server.js",
     "agent:action": "node scripts/agent-action.mjs",
     "build:static": "node scripts/sync-static-data.js && node scripts/inject-config.js",
-    "prestart": "node scripts/sync-static-data.js"
+    "prestart": "node scripts/sync-static-data.js",
+    "test": "node --test tests/**/*.test.js",
+    "lint": "eslint .",
+    "format": "prettier --write \"lib/**\" \"tests/**\" \"server.js\" \"mcp-server.js\" \"scripts/*.{js,mjs}\" \"docs/**\" \"*.md\" \".github/**\" \"eslint.config.js\" \"package.json\" \".prettierrc\" \"AGENTS.md\" \"CLAUDE.md\"",
+    "format:check": "prettier --check \"lib/**\" \"tests/**\" \"server.js\" \"mcp-server.js\" \"scripts/*.{js,mjs}\" \"docs/**\" \"*.md\" \".github/**\" \"eslint.config.js\" \"package.json\" \".prettierrc\" \"AGENTS.md\" \"CLAUDE.md\"",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.28.0",
+    "eslint": "^9.28.0",
+    "globals": "^16.2.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.5.3"
   },
   "dependencies": {
     "@azure/identity": "^4.2.1",
